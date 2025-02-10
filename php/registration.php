@@ -1,5 +1,5 @@
 <?php
-include 'config.php'; // Include database connection
+include 'config.php'; // database connection
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $first_name = $_POST['first_name'];
