@@ -22,12 +22,12 @@ header {
 
 header h1 a {
     text-decoration: none;
-    color: rgb(106, 35, 161); /* Fix: Matches header text */
+    color: rgb(106, 35, 161);
     font-weight: bold;
 }
 
 header h1 a:hover {
-    color: #04AA6D;
+    color: #000000;
     transition: 0.3s;
 }
 
@@ -52,7 +52,7 @@ header h1 a:hover {
 }
 
 #headerlinks a:hover {
-    color: #04AA6D;
+    color: rgb(106, 35, 161);
 }
 
 #primarynav ul {
@@ -118,11 +118,11 @@ footer {
 }
 
 #footerlinks a:hover {
-    color: #ffffff;
+    color: rgb(106, 35, 161);
 }
 
 
-/* mobile navigation */
+/* mobile nav */
 
 @media screen and (max-width: 600px) {
     #primarynav li, #headerlinks li, #footerlinks li {
