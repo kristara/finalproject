@@ -8,11 +8,12 @@
 
 <body>
     <div id="pagewrapper">
-		<nav id="headerlinks">
-			<ul>
-				<li><a href="login.html">Log in</a></li>
-			</ul>
-		</nav>
+        <nav id="headerlinks">
+            <ul>
+                <li><a href="login.html">Log in</a></li>
+            </ul>
+        </nav>
+
         <header>
             <h1><a href="holidayMatch.html">Holiday Match</a></h1>
         </header>
@@ -25,9 +26,39 @@
                 <li><a href="managebooking.html">Manage Booking</a></li>
             </ul>
         </nav>
-
+        <!-- Main booking form section -->
         <section>
             <h2>Book a Flight</h2>
+            <!-- Flight search form. Data is submitted to the PHP backend script-->
+            <form action="http://localhost:8000/php/book_flight.php" method="POST">
+                <!-- Departure always as LHR -->
+                <label for="origin">From:</label>
+                <input type="text" name="origin" id="origin" value="London Heathrow (LHR)" readonly><br><br>
+                <!-- Dropdown to select destination-->
+                <label for="destination_id">To:</label>
+                <select name="destination_id" id="destination_id" required>
+                    <option value="">Select destination</option>
+                    <option value="1">Paris</option>
+                    <option value="2">New York</option>
+                    <option value="3">Tokyo</option>
+                    <!-- Will generate from DB the actual destinations -->
+                </select><br><br>
+                <!-- Departure Date -->
+                <label for="departure_date">Departure Date:</label>
+                <input type="date" name="departure_date" id="departure_date" required><br><br>
+                <!-- Passengers -->
+                <label for="number_of_passengers">Number of Passengers:</label>
+                <input type="number" name="number_of_passengers" id="number_of_passengers" min="1" required><br><br>
+                <!-- Seat Class -->
+                <label for="seat_class">Seat Class:</label>
+                <select name="seat_class" id="seat_class" required>
+                    <option value="economy">Economy</option>
+                    <option value="business">Business</option>
+                    <option value="first class">First Class</option>
+                </select><br><br>
+                <!-- Submit button to trigger flight search -->
+                <button type="submit">Search Flights</button>
+            </form>
         </section>
 
         <footer>

@@ -25,11 +25,26 @@
 				<li><a href="managebooking.html">Manage Booking</a></li>
 			</ul>
 		</nav>
+		<!-- Main content section: destination keyword filter -->
 		<section>
-			<h2>HOME PAGE INFO TO BE ADDED</h2>
-			<p>
-			Main page to consist of filter search that matches possible holidays
-			</p>
+			<!-- Form that submits selected keywords to the PHP filtering script -->
+			<form action="http://localhost:8000/php/filter_destinations.php" method="POST">
+				<h2>Choose destination features:</h2>
+				<!-- Checkbox filters for destination types -->
+				<label><input type="checkbox" name="keywords[]" value="beach"> Beach</label>
+				<label><input type="checkbox" name="keywords[]" value="city"> City</label>
+				<label><input type="checkbox" name="keywords[]" value="mountains"> Mountains</label>
+				<label><input type="checkbox" name="keywords[]" value="snow"> Snow</label>
+				<label><input type="checkbox" name="keywords[]" value="adventure"> Adventure</label>
+				<label><input type="checkbox" name="keywords[]" value="luxury"> Luxury</label>
+				<label><input type="checkbox" name="keywords[]" value="budget"> Budget</label>
+				<label><input type="checkbox" name="keywords[]" value="cultural"> Cultural</label>
+				<label><input type="checkbox" name="keywords[]" value="island"> Island</label>
+				<label><input type="checkbox" name="keywords[]" value="romantic"> Romantic</label>
+				<!-- Submit button to trigger PHP filter script -->
+				<br><br>
+				<button type="submit">Find Destinations</button>
+			</form>
 		</section>
 		<footer>
 			<nav id="footerlinks">
