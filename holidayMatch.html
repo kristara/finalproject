@@ -3,7 +3,7 @@
 <head>
 	<title>holidayMatch</title>
 	<meta charset="UTF-8">
-	<link rel="stylesheet" href="css/css.css">
+	<link rel="stylesheet" href="css.css">
 </head>
 
 <body>
@@ -21,14 +21,14 @@
 			<ul>
 				<li class="current"><a href="holidayMatch.html">Home</a></li>
 				<li><a href="explore.html">Explore</a></li>
-				<li><a href="book.html">Book</a></li>
-				<li><a href="managebooking.html">Manage Booking</a></li>
+				<li><a href="/book.php">Book</a></li>
+				<li><a href="/managebooking.html">Manage Booking</a></li>
 			</ul>
 		</nav>
 		<!-- Main content section: destination keyword filter -->
 		<section>
 			<!-- Form that submits selected keywords to the PHP filtering script -->
-			<form action="http://localhost:8000/php/filter_destinations.php" method="POST">
+			<form action="http://localhost:8000/filter_destinations.php" method="POST">
 				<h2>Choose destination features:</h2>
 				<!-- Checkbox filters for destination types -->
 				<label><input type="checkbox" name="keywords[]" value="beach"> Beach</label>

@@ -1,9 +1,0 @@
-<?php
-include 'config.php'; // database connection
-
-
-
-
-// Close the database connection
-$conn->close();
-?>

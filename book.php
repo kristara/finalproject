@@ -1,9 +1,17 @@
+<?php
+include 'config.php'; // database connection
+
+// Fetch all destinations
+$sql = "SELECT destination_id, name, country FROM destinations ORDER BY name ASC";
+$result = $conn->query($sql);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Book a Flight - HolidayMatch</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="css/css.css">
+    <link rel="stylesheet" href="css.css">
 </head>
 
 <body>
@@ -22,27 +30,33 @@
             <ul>
                 <li><a href="holidayMatch.html">Home</a></li>
                 <li><a href="explore.html">Explore</a></li>
-                <li class="current"><a href="book.html">Book</a></li>
-                <li><a href="managebooking.html">Manage Booking</a></li>
+                <li class="current"><a href="/book.php">Book</a></li>
+                <li><a href="/managebooking.html">Manage Booking</a></li>
             </ul>
         </nav>
         <!-- Main booking form section -->
         <section>
             <h2>Book a Flight</h2>
             <!-- Flight search form. Data is submitted to the PHP backend script-->
-            <form action="http://localhost:8000/php/book_flight.php" method="POST">
+            <form action="http://localhost:8000/book_flight.php" method="POST">
                 <!-- Departure always as LHR -->
                 <label for="origin">From:</label>
                 <input type="text" name="origin" id="origin" value="London Heathrow (LHR)" readonly><br><br>
-                <!-- Dropdown to select destination-->
+                <!-- Destination from db -->
                 <label for="destination_id">To:</label>
                 <select name="destination_id" id="destination_id" required>
                     <option value="">Select destination</option>
-                    <option value="1">Paris</option>
-                    <option value="2">New York</option>
-                    <option value="3">Tokyo</option>
-                    <!-- Will generate from DB the actual destinations -->
+                    <?php
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            echo "<option value='{$row['destination_id']}'>" . htmlspecialchars($row['name']) . ", " . htmlspecialchars($row['country']) . "</option>";
+                        }
+                    } else {
+                        echo "<option value=''>No destinations available</option>";
+                    }
+                    ?>
                 </select><br><br>
+
                 <!-- Departure Date -->
                 <label for="departure_date">Departure Date:</label>
                 <input type="date" name="departure_date" id="departure_date" required><br><br>
@@ -73,3 +87,7 @@
     </div>
 </body>
 </html>
+
+<?php
+$conn->close(); // Close DB connection
+?>
