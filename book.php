@@ -2,12 +2,13 @@
 include 'config.php'; // database connection
 
 // initialise variables
+$destination_id = "";
 $destination_name = "";
 $destination_country = "";
-$destination_id = isset($_GET['destination_id']) ? intval($_GET['destination_id']) : 0;
 
 // Check if destination_id is provided in URL
-if ($destination_id > 0) {
+if (isset($_GET['destination_id'])) {
+    $destination_id = intval($_GET['destination_id']);
     // Fetch all destinations
     $sql = "SELECT name, country FROM destinations WHERE destination_id = ?";
     $stmt = $conn->prepare($sql);
@@ -28,38 +29,79 @@ if ($destination_id > 0) {
 <head>
     <title>Book a Flight - HolidayMatch</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="css.css">
+    <link rel="stylesheet" href="../css.css">
 </head>
 
 <body>
     <div id="pagewrapper">
-        <h2>Book a Flight</h2>
-        <form action="book_flight.php" method="POST">
-            <label>From:</label>
-            <input type="text" name="origin" value="London Heathrow (LHR)" readonly><br><br>
+        <nav id="headerlinks">
+            <ul>
+                <li><a href="registration.html">Registration</a></li>
+                <li><a href="login.html">Log in</a></li>
+            </ul>
+        </nav>
 
-            <label>To:</label>
-            <input type="text" name="destination" value="<?php echo $destination_name . ', ' . $destination_country; ?>" readonly><br><br>
-            <input type="hidden" name="destination_id" value="<?php echo $destination_id; ?>">
+        <header>
+            <h1><a href="holidayMatch.html">Holiday Match</a></h1>
+        </header>
 
-            <label>Departure Date:</label>
-            <input type="date" name="departure_date" required><br><br>
+        <nav id="primarynav">
+            <ul>
+                <li><a href="holidayMatch.html">Home</a></li>
+                <li><a href="explore.html">Explore</a></li>
+                <li class="current"><a href="book.php">Book</a></li>
+                <li><a href="managebooking.html">Manage Booking</a></li>
+            </ul>
+        </nav>
 
-            <label>Number of Passengers:</label>
-            <input type="number" name="number_of_passengers" min="1" required><br><br>
+        <section>
+            <h2>Book a Flight</h2>
+            <form action="book_flight.php" method="POST">
+                <label>From:</label>
+                <input type="text" name="origin" value="London Heathrow (LHR)" readonly><br><br>
 
-            <label>Seat Class:</label>
-            <select name="seat_class" required>
-                <option value="economy">Economy</option>
-                <option value="business">Business</option>
-                <option value="first class">First Class</option>
-            </select><br><br>
+                <label>To:</label>
+                <select name="destination_id" required>
+                    <option value="">Select destination</option>
+                    <?php
+                    $destinations = $conn->query("SELECT destination_id, name, country FROM destinations ORDER BY name ASC");
+                    while ($row = $destinations->fetch_assoc()) {
+                        $selected = ($row['destination_id'] == $destination_id) ? 'selected' : '';
+                        echo "<option value='{$row['destination_id']}' $selected>{$row['name']}, {$row['country']}</option>";
+                    }
+                    ?>
+                </select><br><br>
 
-            <button type="submit">Confirm Booking</button>
-        </form>
+                <label>Departure Date:</label>
+                <input type="date" name="departure_date" required><br><br>
+
+                <label>Number of Passengers:</label>
+                <input type="number" name="number_of_passengers" min="1" required><br><br>
+
+                <label>Seat Class:</label>
+                <select name="seat_class" required>
+                    <option value="economy">Economy</option>
+                    <option value="business">Business</option>
+                    <option value="first class">First Class</option>
+                </select><br><br>
+
+                <button type="submit">Confirm Booking</button>
+            </form>
+        </section>
+
+        <footer>
+            <nav id="footerlinks">
+                <ul>
+                    <li><a href="termsofuse.html">Terms of Use &#124;</a></li>
+                    <li><a href="copyright.html">Copyright &#124;</a></li>
+                    <li><a href="contactus.html">Contact Us</a></li>
+                </ul>
+            </nav>
+        </footer>
     </div>
 </body>
 </html>
 
-<?php $conn->close();
+<?php
+$conn->close(); // Close DB connection
 ?>
