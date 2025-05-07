@@ -14,13 +14,24 @@ if (isset($_POST['keywords']) && is_array($_POST['keywords'])) {
     // Convert the array of quoted keywords into a comma-separated string
     $keyword_list = implode(",", $safe_keywords);
 
-    // SQL query to find distinct destinations that match any of the selected keywords
-    $sql = "
-        SELECT DISTINCT d.destination_id, d.name, d.country
-        FROM destinations d
-        JOIN destination_keywords dk ON d.destination_id = dk.destination_id
-        WHERE dk.keyword IN ($keyword_list)
-    ";
+     // Price range filtering
+    $price_filter = "";
+    if (isset($_POST['price_ranges']) && is_array($_POST['price_ranges'])) {
+        $price_conditions = [];
+        foreach ($_POST['price_ranges'] as $range) {
+            list($min, $max) = explode('-', $range);
+            $price_conditions[] = "(f.price BETWEEN $min AND $max)";
+        }
+        $price_filter = " AND (" . implode(" OR ", $price_conditions) . ")";
+    }
+
+    // SQL query to find distinct destinations that match any of the selected keywords and price
+    $sql = "SELECT DISTINCT d.destination_id, d.name, d.country, MIN(f.price) AS lowest_price
+            FROM destinations d
+            JOIN destination_keywords dk ON d.destination_id = dk.destination_id
+            JOIN flights f ON f.destination_id = d.destination_id
+            WHERE dk.keyword IN ($keyword_list) $price_filter
+            GROUP BY d.destination_id";
 
     // run the query
     $result = $conn->query($sql);
