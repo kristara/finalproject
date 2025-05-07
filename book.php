@@ -1,9 +1,26 @@
 <?php
 include 'config.php'; // database connection
 
-// Fetch all destinations
-$sql = "SELECT destination_id, name, country FROM destinations ORDER BY name ASC";
-$result = $conn->query($sql);
+// initialise variables
+$destination_name = "";
+$destination_country = "";
+$destination_id = isset($_GET['destination_id']) ? intval($_GET['destination_id']) : 0;
+
+// Check if destination_id is provided in URL
+if ($destination_id > 0) {
+    // Fetch all destinations
+    $sql = "SELECT name, country FROM destinations WHERE destination_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $destination_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $destination = $result->fetch_assoc();
+        $destination_name = $destination['name'];
+        $destination_country = $destination['country'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -16,78 +33,33 @@ $result = $conn->query($sql);
 
 <body>
     <div id="pagewrapper">
-        <nav id="headerlinks">
-            <ul>
-                <li><a href="login.html">Log in</a></li>
-            </ul>
-        </nav>
+        <h2>Book a Flight</h2>
+        <form action="book_flight.php" method="POST">
+            <label>From:</label>
+            <input type="text" name="origin" value="London Heathrow (LHR)" readonly><br><br>
 
-        <header>
-            <h1><a href="holidayMatch.html">Holiday Match</a></h1>
-        </header>
+            <label>To:</label>
+            <input type="text" name="destination" value="<?php echo $destination_name . ', ' . $destination_country; ?>" readonly><br><br>
+            <input type="hidden" name="destination_id" value="<?php echo $destination_id; ?>">
 
-        <nav id="primarynav">
-            <ul>
-                <li><a href="holidayMatch.html">Home</a></li>
-                <li><a href="explore.html">Explore</a></li>
-                <li class="current"><a href="/book.php">Book</a></li>
-                <li><a href="/managebooking.html">Manage Booking</a></li>
-            </ul>
-        </nav>
-        <!-- Main booking form section -->
-        <section>
-            <h2>Book a Flight</h2>
-            <!-- Flight search form. Data is submitted to the PHP backend script-->
-            <form action="http://localhost:8000/book_flight.php" method="POST">
-                <!-- Departure always as LHR -->
-                <label for="origin">From:</label>
-                <input type="text" name="origin" id="origin" value="London Heathrow (LHR)" readonly><br><br>
-                <!-- Destination from db -->
-                <label for="destination_id">To:</label>
-                <select name="destination_id" id="destination_id" required>
-                    <option value="">Select destination</option>
-                    <?php
-                    if ($result && $result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            echo "<option value='{$row['destination_id']}'>" . htmlspecialchars($row['name']) . ", " . htmlspecialchars($row['country']) . "</option>";
-                        }
-                    } else {
-                        echo "<option value=''>No destinations available</option>";
-                    }
-                    ?>
-                </select><br><br>
+            <label>Departure Date:</label>
+            <input type="date" name="departure_date" required><br><br>
 
-                <!-- Departure Date -->
-                <label for="departure_date">Departure Date:</label>
-                <input type="date" name="departure_date" id="departure_date" required><br><br>
-                <!-- Passengers -->
-                <label for="number_of_passengers">Number of Passengers:</label>
-                <input type="number" name="number_of_passengers" id="number_of_passengers" min="1" required><br><br>
-                <!-- Seat Class -->
-                <label for="seat_class">Seat Class:</label>
-                <select name="seat_class" id="seat_class" required>
-                    <option value="economy">Economy</option>
-                    <option value="business">Business</option>
-                    <option value="first class">First Class</option>
-                </select><br><br>
-                <!-- Submit button to trigger flight search -->
-                <button type="submit">Search Flights</button>
-            </form>
-        </section>
+            <label>Number of Passengers:</label>
+            <input type="number" name="number_of_passengers" min="1" required><br><br>
 
-        <footer>
-            <nav id="footerlinks">
-                <ul>
-                    <li><a href="termsofuse.html">Terms of Use &#124;</a></li>
-                    <li><a href="copyright.html">Copyright &#124;</a></li>
-                    <li><a href="contactus.html">Contact Us</a></li>
-                </ul>
-            </nav>
-        </footer>
+            <label>Seat Class:</label>
+            <select name="seat_class" required>
+                <option value="economy">Economy</option>
+                <option value="business">Business</option>
+                <option value="first class">First Class</option>
+            </select><br><br>
+
+            <button type="submit">Confirm Booking</button>
+        </form>
     </div>
 </body>
 </html>
 
-<?php
-$conn->close(); // Close DB connection
+<?php $conn->close();
 ?>

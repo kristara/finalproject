@@ -38,20 +38,14 @@ if (isset($_POST['keywords']) && is_array($_POST['keywords'])) {
 
     // If matches were found then display them
     if ($result && $result->num_rows > 0) {
-        echo "<h3>Destinations matching your choices:</h3>";
+        echo "<h1>Destinations matching your choices:</h1>";
         echo "<ul>";
 
         // Loop through each matching destination and display it with a Book button
         while ($row = $result->fetch_assoc()) {
-            echo "<li>";
             // Output destination name and country safely
-            echo htmlspecialchars($row['name']) . " (" . htmlspecialchars($row['country']) . ")";
-            // Form with hidden destination_id to pass to book.html
-            echo " <form action='book.html' method='GET' style='display:inline;'>";
-            echo "<input type='hidden' name='destination_id' value='" . $row['destination_id'] . "'>";
-            echo "<button type='submit'>Book</button>";
-            echo "</form>";
-
+            echo "<li>" . htmlspecialchars($row['name']) . " (" . htmlspecialchars($row['country']) . ") - £" . htmlspecialchars($row['lowest_price']) . "";
+            echo " <a href='book.php?destination_id=" . $row['destination_id'] . "'>Book</a>";
             echo "</li>";
         }
         echo "</ul>";
