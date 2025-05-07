@@ -50,7 +50,7 @@ if (isset($_GET['destination_id'])) {
                 <li><a href="holidayMatch.html">Home</a></li>
                 <li><a href="explore.html">Explore</a></li>
                 <li class="current"><a href="book.php">Book</a></li>
-                <li><a href="managebooking.html">Manage Booking</a></li>
+                <li><a href="managebooking.php">Manage Booking</a></li>
             </ul>
         </nav>
 
