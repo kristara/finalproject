@@ -68,8 +68,8 @@ $conn->close();
 	<div id="pagewrapper">
 		<nav id="headerlinks">
 			<ul>
-				<li><a href="registration.html">Registration</a></li>
-				<li><a href="login.html">Log in</a></li>
+				<li><a href="registration.php">Registration</a></li>
+				<li><a href="login.php">Log in</a></li>
 			</ul>
 		</nav>
 	    <header>

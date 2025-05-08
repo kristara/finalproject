@@ -1,3 +1,12 @@
+<?php
+session_start(); // Start the session
+include 'config.php'; // database connection
+
+$message = ""; // Initialise message variable
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,8 +19,8 @@
 	<div id="pagewrapper">
 		<nav id="headerlinks">
 			<ul>
-				<li><a href="registration.html">Registration</a></li>
-				<li><a href="login.html">Log in</a></li>
+				<li><a href="registration.php">Registration</a></li>
+				<li><a href="login.php">Log in</a></li>
 			</ul>
 		</nav>
 	    <header>
@@ -28,7 +37,7 @@
 		<section>
 			<h2>xxxxxxx</h2>
 			<p>
-			log in form 
+			log in form
 			</p>
 		</section>
 		<footer>
