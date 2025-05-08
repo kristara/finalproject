@@ -1,6 +1,56 @@
 <?php
-session_start();
 include 'config.php'; // Database connection
+
+
+
+
+
+
+
 
 $conn->close();
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>holidayMatch</title>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="css.css">
+</head>
+
+<body>
+	<div id="pagewrapper">
+		<nav id="headerlinks">
+			<ul>
+				<li><a href="registration.html">Registration</a></li>
+				<li><a href="login.html">Log in</a></li>
+			</ul>
+		</nav>
+	    <header>
+			<h1><a href="holidayMatch.html">Holiday Match</a></h1>
+		</header>
+	    <nav id="primarynav">
+			<ul>
+				<li class="current"><a href="holidayMatch.html">Home</a></li>
+				<li><a href="explore.html">Explore</a></li>
+				<li><a href="/book.php">Book</a></li>
+				<li><a href="/managebooking.php">Manage Booking</a></li>
+			</ul>
+		</nav>
+		<section>
+			<h2>Modify Booking</h2>
+			<p><a href="managebooking.php">Return to Manage Booking</a></p>
+		</section>
+		<footer>
+			<nav id="footerlinks">
+				<ul>
+					<li><a href="termsofuse.html"> Terms of Use &#124;</a></li>
+					<li><a href="copyright.html">Copyright &#124;</a></li>
+					<li><a href="contactus.html"> Contact Us</a></li>
+				</ul>
+			</nav>
+		</footer>
+	</div>
+</body>
+</html>

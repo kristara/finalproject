@@ -1,7 +1,7 @@
 <?php
 include 'config.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reservation_id'])) {
     // form data and trim whitespace
     $first_name = trim($_POST['first_name']);
     $last_name = trim($_POST['last_name']);

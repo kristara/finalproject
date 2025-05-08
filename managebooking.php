@@ -45,18 +45,18 @@ include 'config.php'; // database connection
         // check if form is submitted
         if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == "POST") {
             // Retrieve user input
-			$reservation_id = intval($_POST['reservation_id']);
+            $reservation_id = intval($_POST['reservation_id']);
             $last_name = trim($_POST['last_name']);
 
             // SQL query to find the booking based on reservation number and last name
-            $sql = "SELECT r.reservation_id, f.origin, d.name AS destination, f.departure_time,
+            $sql = "SELECT r.reservation_id, f.origin, d.name AS destination, f.departure_time, 
                            r.number_of_passengers, r.seat_class, r.status, u.last_name
                     FROM reservations r
                     JOIN flights f ON r.flight_id = f.flight_id
                     JOIN destinations d ON f.destination_id = d.destination_id
                     JOIN users u ON r.user_id = u.user_id
                     WHERE r.reservation_id = ? AND u.last_name = ?";
-			// prepared statement to prevent SQL injection
+            // prepared statement to prevent SQL injection
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("is", $reservation_id, $last_name);
             $stmt->execute();
@@ -65,8 +65,8 @@ include 'config.php'; // database connection
             if (!$result) {
                 echo "<p>Error: " . $conn->error . "</p>";
             }
-			// If a matching booking is found then display the details
-			elseif ($result->num_rows > 0) {
+            // If a matching booking is found then display the details
+            if ($result->num_rows > 0) {
                 $booking = $result->fetch_assoc();
                 echo "<h3>Booking Details:</h3>";
                 echo "<p><strong>Reservation Number:</strong> " . $booking['reservation_id'] . "</p>";
@@ -77,7 +77,6 @@ include 'config.php'; // database connection
                 echo "<p><strong>Passengers:</strong> " . $booking['number_of_passengers'] . "</p>";
                 echo "<p><strong>Class:</strong> " . ucfirst($booking['seat_class']) . "</p>";
                 echo "<p><strong>Status:</strong> " . ucfirst($booking['status']) . "</p>";
-
                 // Show modify and cancel options
                 if ($booking['status'] !== 'cancelled') {
                     echo "<h3>Modify Booking</h3>";
@@ -97,6 +96,12 @@ include 'config.php'; // database connection
                           	</select><br><br>";
 
                     echo "<button type='submit'>Save Changes</button>";
+                    echo "</form>";
+
+                    // cancel option
+                    echo "<form action='cancel_booking.php' method='POST' style='margin-top: 10px;'>";
+                    echo "<input type='hidden' name='reservation_id' value='" . $booking['reservation_id'] . "'>";
+                    echo "<button type='submit'>Cancel Booking</button>";
                     echo "</form>";
                 } else {
                     echo "<p><em>This booking is already cancelled.</em></p>";
