@@ -2,6 +2,7 @@
 include 'config.php'; // database connection
 
 $message = ""; // Initialise message variable
+$redirect = false; // Flag to control redirection
 
 // Check if the form is submitted
 if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reservation_id'])) {
@@ -50,7 +51,9 @@ if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == "POST" &&
                                         <li><strong>Departure Date:</strong> " . htmlspecialchars($new_departure_date) . "</li>
                                         <li><strong>Number of Passengers:</strong> " . htmlspecialchars($new_passengers) . "</li>
                                         <li><strong>Seat Class:</strong> " . ucfirst(htmlspecialchars($new_seat_class)) . "</li>
-                                    </ul>";
+                                    </ul>
+                                    <p><strong>Redirecting to Manage Booking in 3 seconds...</strong></p>";
+                                $redirect = true; // trigger redirect
                     } else {
                         $message = "<p>No changes were made to your booking.</p>";
                     }
@@ -75,6 +78,14 @@ $conn->close();
 	<title>Modify Booking - HolidayMatch</title>
 	<meta charset="UTF-8">
 	<link rel="stylesheet" href="css.css">
+    <script>
+        // Auto redirect after modification
+        <?php if ($redirect) : ?>
+        setTimeout(() => {
+            window.location.href = "managebooking.php";
+        }, 3000); // redirect after 3 seconds
+        <?php endif; ?>
+    </script>
 </head>
 <body>
 	<div id="pagewrapper">
