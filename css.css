@@ -135,3 +135,34 @@ footer {
         padding: 10px;
     }
 }
+
+/* message box */
+
+.message-box {
+    padding: 15px;
+    margin: 15px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.message-box h3 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.action-links {
+    margin-top: 15px;
+}
+
+.action-links a {
+    display: inline-block;
+    margin-right: 10px;
+    text-decoration: none;
+    color: #007bff;
+}
+
+.action-links a:hover {
+    text-decoration: underline;
+}
