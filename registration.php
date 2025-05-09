@@ -9,12 +9,6 @@ $message = ""; // Initialise message variable
 
 // Force check for REQUEST_METHOD to avoid errors
 if (isset($_SERVER) && array_key_exists('REQUEST_METHOD', $_SERVER) && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Debugging and checking if form data is submitted
-    echo "<h1>Form Submitted Successfully</h1>";
-    echo "<pre>";
-    print_r($_POST);
-    echo "</pre>";
-
     // Form data and trim whitespace
     $first_name = trim(htmlspecialchars($_POST['first_name'] ?? ''));
     $middle_name = trim(htmlspecialchars($_POST['middle_name'] ?? ''));
@@ -32,7 +26,7 @@ if (isset($_SERVER) && array_key_exists('REQUEST_METHOD', $_SERVER) && $_SERVER[
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $message = "<div class='error-message'>Invalid email format.</div>";
     } elseif (strlen($password) < 8 || !preg_match("/[A-Za-z]/", $password) || !preg_match("/[0-9]/", $password)) {
-        $message = "<div class='error-message'>Password must be at least 8 characters, with both letters and numbers.</div>";
+        $message = "<div class='error-message'>Password must be at least 8 characters long and contain both letters and numbers.</div>";
     } else {
         // Check if email already exists
         $email_check = "SELECT email FROM users WHERE email = ?";
@@ -44,15 +38,30 @@ if (isset($_SERVER) && array_key_exists('REQUEST_METHOD', $_SERVER) && $_SERVER[
         if ($result->num_rows > 0) {
             $message = "<div class='error-message'>An account with this email already exists.</div>";
         } else {
+            // Hash the password
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            $query = "INSERT INTO users (first_name, middle_name, last_name, email, password_hash, phone_number, post_code, city, country, dob, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            // Insert user data into the database
+            $query = "INSERT INTO users (first_name, middle_name, last_name, email, password_hash, phone_number, post_code, city, country, dob, address)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
-            $stmt->bind_param("sssssssssss", $first_name, $middle_name, $last_name, $email, $hashed_password, $phone_number, $post_code, $city, $country, $dob, $address);
+            $stmt->bind_param(
+                "sssssssssss",
+                $first_name,
+                $middle_name,
+                $last_name,
+                $email,
+                $hashed_password,
+                $phone_number,
+                $post_code,
+                $city,
+                $country,
+                $dob,
+                $address
+            );
 
             if ($stmt->execute()) {
-                header("Location: login.php?success=1");
-                exit();
+                $message = "<div class='success-message'>Registration successful! You can now <a href='login.php'>log in here</a>.</div>";
             } else {
                 $message = "<div class='error-message'>Error during registration: " . $conn->error . "</div>";
             }
