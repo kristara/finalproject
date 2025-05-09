@@ -1,6 +1,9 @@
 <?php
 session_start(); // Start the session
-include 'config.php'; // database connection
+session_unset(); // Unset all session variables
+session_destroy(); // Destroy the session
 
-$conn->close()
+// Redirect to the main page after logout
+header("Location: holidayMatch.html");
+exit();
 ?>

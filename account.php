@@ -51,13 +51,12 @@ $conn->close();
 <body>
 	<div id="pagewrapper">
 		<nav id="headerlinks">
-			<ul>
-				<li><a href="logout.php">Log Out</a></li>
-			</ul>
-		</nav>
+            <ul>
+                <li><a href="logout.php">Log Out</a></li>
+            </ul>
+        </nav>
 	    <header>
-			<h1><a href="holidayMatch.html">Holiday Match</a></h1>
-            <h2>Welcome, <?php echo htmlspecialchars($user['first_name']) . ' ' . htmlspecialchars($user['last_name']); ?></h2>
+            <h1>Welcome <?php echo htmlspecialchars($user['first_name']) . ' ' . htmlspecialchars($user['last_name']); ?></h1>
             <p><?php echo htmlspecialchars($user['email']); ?></p>
 		</header>
 	    <nav id="primarynav">

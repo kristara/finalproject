@@ -26,7 +26,7 @@ if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == "POST") {
                 // Successful login
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['email'] = $user['email'];
-                header("Location: holidayMatch.html");
+                header("Location: account.php");
                 exit();
             } else {
                 $message = "Incorrect password.";

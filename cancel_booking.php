@@ -68,8 +68,16 @@ $conn->close();
 	<div id="pagewrapper">
 		<nav id="headerlinks">
 			<ul>
-				<li><a href="registration.php">Registration</a></li>
-				<li><a href="login.php">Log in</a></li>
+				<?php
+                session_start();
+                if (isset($_SESSION['user_id'])) {
+                    echo '<li><a href="account.php">My Account</a></li>';
+                    echo '<li><a href="logout.php">Log Out</a></li>';
+                } else {
+                    echo '<li><a href="registration.php">Register</a></li>';
+                    echo '<li><a href="login.php">Log In</a></li>';
+                }
+                ?>
 			</ul>
 		</nav>
 	    <header>
