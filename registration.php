@@ -57,7 +57,7 @@ $conn->close();
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css.css">
     <style>
-        .message-box { margin-top: 15px; }
+        .message-box { margin-block-start: 15px; }
         .success-message { color: green; }
         .error-message { color: red; }
     </style>
