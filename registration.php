@@ -1,23 +1,38 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 include 'config.php';
 
 $message = ""; // Initialise message variable
 
-if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reservation_id'])) {
-    // form data and trim whitespace
-    $first_name = trim(htmlspecialchars($_POST['first_name']));
-    $middle_name = trim(htmlspecialchars($_POST['middle_name']));
-    $last_name = trim(htmlspecialchars($_POST['last_name']));
-    $email = trim(htmlspecialchars($_POST['email']));
-    $password = trim($_POST['password']);
-    $phone_number = trim(htmlspecialchars($_POST['phone_number']));
-    $post_code = trim(htmlspecialchars($_POST['post_code']));
-    $city = trim(htmlspecialchars($_POST['city']));
-    $country = trim(htmlspecialchars($_POST['country']));
+// Force check for REQUEST_METHOD to avoid errors
+if (isset($_SERVER) && array_key_exists('REQUEST_METHOD', $_SERVER) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Debugging and checking if form data is submitted
+    echo "<h1>Form Submitted Successfully</h1>";
+    echo "<pre>";
+    print_r($_POST);
+    echo "</pre>";
+
+    // Form data and trim whitespace
+    $first_name = trim(htmlspecialchars($_POST['first_name'] ?? ''));
+    $middle_name = trim(htmlspecialchars($_POST['middle_name'] ?? ''));
+    $last_name = trim(htmlspecialchars($_POST['last_name'] ?? ''));
+    $email = trim(htmlspecialchars($_POST['email'] ?? ''));
+    $password = trim($_POST['password'] ?? '');
+    $phone_number = trim(htmlspecialchars($_POST['phone_number'] ?? ''));
+    $post_code = trim(htmlspecialchars($_POST['post_code'] ?? ''));
+    $city = trim(htmlspecialchars($_POST['city'] ?? ''));
+    $country = trim(htmlspecialchars($_POST['country'] ?? ''));
+    $dob = trim($_POST['dob'] ?? '');
+    $address = trim(htmlspecialchars($_POST['address'] ?? ''));
 
     // Validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $message = "<div class='error-message'>Invalid email format.</div>";
+    } elseif (strlen($password) < 8 || !preg_match("/[A-Za-z]/", $password) || !preg_match("/[0-9]/", $password)) {
+        $message = "<div class='error-message'>Password must be at least 8 characters, with both letters and numbers.</div>";
     } else {
         // Check if email already exists
         $email_check = "SELECT email FROM users WHERE email = ?";
@@ -27,19 +42,17 @@ if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == "POST" &&
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            $message = "An account with this email already exists.";
+            $message = "<div class='error-message'>An account with this email already exists.</div>";
         } else {
-            // Hash the password securely
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            // Insert user data into the database
-            $query = "INSERT INTO users (first_name, middle_name, last_name, email, password_hash, phone_number, post_code, city, country)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO users (first_name, middle_name, last_name, email, password_hash, phone_number, post_code, city, country, dob, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
-            $stmt->bind_param("sssssssss", $first_name, $middle_name, $last_name, $email, $hashed_password, $phone_number, $post_code, $city, $country);
+            $stmt->bind_param("sssssssssss", $first_name, $middle_name, $last_name, $email, $hashed_password, $phone_number, $post_code, $city, $country, $dob, $address);
 
             if ($stmt->execute()) {
-                $message = "<div class='success-message'>Registration successful! You can now <a href='login.php'>log in here</a>.</div>";
+                header("Location: login.php?success=1");
+                exit();
             } else {
                 $message = "<div class='error-message'>Error during registration: " . $conn->error . "</div>";
             }
@@ -58,8 +71,8 @@ $conn->close();
     <link rel="stylesheet" href="css.css">
     <style>
         .message-box { margin-block-start: 15px; }
-        .success-message { color: green; }
-        .error-message { color: red; }
+        .success-message { color: green; font-weight: bold; }
+        .error-message { color: red; font-weight: bold; }
     </style>
 </head>
 
@@ -89,7 +102,7 @@ $conn->close();
                 <label>First Name:</label>
                 <input type="text" name="first_name" required><br><br>
 
-                <label>Middle Name:</label>
+                <label>Middle Name (optional):</label>
                 <input type="text" name="middle_name"><br><br>
 
                 <label>Last Name:</label>
@@ -101,7 +114,7 @@ $conn->close();
                 <label>Password:</label>
                 <input type="password" name="password" required><br><br>
 
-                <label>Phone Number:</label>
+                <label>Phone Number (optional):</label>
                 <input type="text" name="phone_number"><br><br>
 
                 <label>City:</label>
@@ -112,6 +125,12 @@ $conn->close();
 
                 <label>Country:</label>
                 <input type="text" name="country" required><br><br>
+
+                <label>Date of Birth:</label>
+                <input type="date" name="dob" required><br><br>
+
+                <label>Address (optional):</label>
+                <input type="text" name="address"><br><br>
 
                 <button type="submit">Register</button>
             </form>
