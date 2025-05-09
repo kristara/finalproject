@@ -1,5 +1,9 @@
 <?php
+session_start(); // start the session
 include 'config.php'; // database connection
+
+// check if user is logged in
+$is_logged_in = isset($_SESSION['user_id']);
 
 // initialise variables
 $destination_id = "";
