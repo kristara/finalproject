@@ -1,5 +1,9 @@
 <?php
-session_start(); // start the session
+// Only start the session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include 'config.php'; // database connection
 
 // check if user is logged in
@@ -41,7 +45,6 @@ if (isset($_GET['destination_id'])) {
         <nav id="headerlinks">
             <ul>
 				<?php
-                session_start();
                 if (isset($_SESSION['user_id'])) {
                     echo '<li><a href="account.php">My Account</a></li>';
                     echo '<li><a href="logout.php">Log Out</a></li>';
