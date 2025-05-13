@@ -34,31 +34,34 @@ session_start(); // start the session
 				<p>Find and book your perfect trip!</p>
 			</section>
 
-			<section>
+			<section class="section-filters">
 				<!-- Form that submits selected keywords to the PHP filtering script -->
 				<form action="filter_destinations.php" method="POST">
 					<h2>Choose destination features:</h2>
-					<!-- Checkbox filters for destination types -->
-					<label><input type="checkbox" name="keywords[]" value="beach"> Beach</label>
-					<label><input type="checkbox" name="keywords[]" value="city"> City</label>
-					<label><input type="checkbox" name="keywords[]" value="mountains"> Mountains</label>
-					<label><input type="checkbox" name="keywords[]" value="snow"> Snow</label>
-					<label><input type="checkbox" name="keywords[]" value="adventure"> Adventure</label>
-					<label><input type="checkbox" name="keywords[]" value="luxury"> Luxury</label>
-					<label><input type="checkbox" name="keywords[]" value="budget"> Budget</label>
-					<label><input type="checkbox" name="keywords[]" value="cultural"> Cultural</label>
-					<label><input type="checkbox" name="keywords[]" value="island"> Island</label>
-					<label><input type="checkbox" name="keywords[]" value="romantic"> Romantic</label>
+					<div class="feature-options">
+						<label><input type="checkbox" name="keywords[]" value="beach"> 🏖 Beach</label>
+						<label><input type="checkbox" name="keywords[]" value="city"> 🏙 City</label>
+						<label><input type="checkbox" name="keywords[]" value="mountains"> 🏔 Mountains</label>
+						<label><input type="checkbox" name="keywords[]" value="snow"> ❄️ Snow</label>
+						<label><input type="checkbox" name="keywords[]" value="adventure"> 🚵‍♂️ Adventure</label>
+						<label><input type="checkbox" name="keywords[]" value="luxury"> 💎 Luxury</label>
+						<label><input type="checkbox" name="keywords[]" value="budget"> 💰 Budget</label>
+						<label><input type="checkbox" name="keywords[]" value="cultural"> 🏛 Cultural</label>
+						<label><input type="checkbox" name="keywords[]" value="island"> 🏝 Island</label>
+						<label><input type="checkbox" name="keywords[]" value="romantic"> ❤️ Romantic</label>
+					</div>
 
 					<!--  filters for price -->
-					<h3>Select Price Range:</h3>
-					<label><input type="checkbox" name="price_ranges[]" value="0-500"> Under £500</label>
-					<label><input type="checkbox" name="price_ranges[]" value="500-1000"> £500 - £1,000</label>
-					<label><input type="checkbox" name="price_ranges[]" value="1000-1500"> £1,000 - £2,000</label>
-					<label><input type="checkbox" name="price_ranges[]" value="1500-2000"> £2,000 - £3,000</label>
+					<h3>Price Range</h3>
+					<div class="price-options">
+						<label><input type="radio" name="price_ranges[]" value="0-500"> Under £500</label>
+						<label><input type="radio" name="price_ranges[]" value="500-1000"> £500 - £1,000</label>
+						<label><input type="radio" name="price_ranges[]" value="1000-2000"> £1,000 - £2,000</label>
+						<label><input type="radio" name="price_ranges[]" value="2000-3000"> £2,000 - £3,000</label>
+					</div>
+
 					<!-- Submit button to trigger PHP filter script -->
-					<br><br>
-					<button type="submit">Find Destinations</button>
+					<button type="submit" class="find-btn">Find Destinations</button>
 				</form>
 			</section>
 		</main>

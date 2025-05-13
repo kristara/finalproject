@@ -1,33 +1,38 @@
-
+/* General Styles */
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
     width: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #f7f6fb;
+    color: #333;
+    box-sizing: border-box;
 }
 
 #pagewrapper {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    padding: 0;
 }
 
 header {
-    background-color: #ffffff;
-    color: rgb(106, 35, 161);
+    background-color: #e8e2f1;
+    color: #5b34ac;
     text-align: center;
-    padding: 20px;
-    font-size: 24px;
+    padding: 40px 0;
+    font-size: 28px;
 }
 
 header h1 a {
     text-decoration: none;
-    color: rgb(106, 35, 161);
+    color: #5b34ac;
     font-weight: bold;
 }
 
 header h1 a:hover {
-    color: #000000;
+    color: #7a4dd1;
     transition: 0.3s;
 }
 
@@ -46,20 +51,20 @@ header h1 a:hover {
 
 #headerlinks a {
     text-decoration: none;
-    color: white;
+    color: #ffffff;
     padding: 10px;
     font-size: 14px;
 }
 
 #headerlinks a:hover {
-    color: rgb(106, 35, 161);
+    color: #7a4dd1;
 }
 
 #primarynav ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
-    background-color: #333;
+    background-color: #5b34ac;
     overflow: hidden;
     text-align: center;
 }
@@ -70,13 +75,13 @@ header h1 a:hover {
 
 #primarynav a {
     display: block;
-    color: white;
+    color: #ffffff;
     text-decoration: none;
     padding: 14px 20px;
 }
 
 #primarynav a:hover {
-    background-color: #555;
+    background-color: #7a4dd1;
     transition: 0.3s;
 }
 
@@ -85,19 +90,14 @@ header h1 a:hover {
     font-weight: bold;
 }
 
-section {
-    flex-grow: 1;
-    padding: 20px;
-    text-align: center;
-    background: white;
-}
 
 footer {
     margin-top: auto;
-    background-color: #222;
-    color: white;
+    background-color: #e8e2f1;
+    color: #5b34ac;
     text-align: center;
-    padding: 10px;
+    padding: 20px;
+    font-size: 16px;
 }
 
 #footerlinks ul {
@@ -120,49 +120,189 @@ footer {
 #footerlinks a:hover {
     color: rgb(106, 35, 161);
 }
-
-
-/* mobile nav */
-
-@media screen and (max-width: 600px) {
-    #primarynav li, #headerlinks li, #footerlinks li {
-        display: block;
-        text-align: center;
-    }
-
-    #primarynav a, #headerlinks a, #footerlinks a {
-        display: block;
-        padding: 10px;
-    }
+/* Section Filters */
+section {
+    flex-grow: 1;
+    padding: 20px;
+    text-align: center;
+    background: #ffffff;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* message box */
+.section-filters {
+    background-color: #ffffff;
+    padding: 25px 30px;
+    margin: 20px auto;
+    max-width: 800px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
 
-.message-box {
-    padding: 15px;
-    margin: 15px 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+.section-filters h2, .section-filters h3 {
+    color: #5b34ac;
+    margin-bottom: 10px;
+}
+
+.section-filters label {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f0eff8;
     color: #333;
+    padding: 8px 12px;
+    margin: 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
 }
 
-.message-box h3 {
-    margin: 0;
-    font-size: 1.2em;
+.section-filters input[type="checkbox"], .section-filters input[type="radio"] {
+    display: none;
 }
 
-.action-links {
+.section-filters input[type="checkbox"]:checked + label, .section-filters input[type="radio"]:checked + label {
+    background-color: #c4b2e6;
+    color: #fff;
+
+/* Button Styling */
+.find-btn {
+    background-color: #5b34ac;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: block;
+    width: 100%;
+    text-align: center;
     margin-top: 15px;
 }
 
-.action-links a {
-    display: inline-block;
-    margin-right: 10px;
-    text-decoration: none;
-    color: #007bff;
+.find-btn:hover {
+    background-color: #7a4dd1;
 }
 
-.action-links a:hover {
+/* Footer Styling - Fixed to Bottom */
+footer {
+    background-color: #5b34ac;
+    color: #ffffff;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 14px;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+footer a {
+    color: #ffffff;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+footer a:hover {
     text-decoration: underline;
 }
+
+/* Form Elements */
+form {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+input[type="text"], input[type="date"], input[type="number"], select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #c4b2e6;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+input:focus, select:focus {
+    border-color: #5b34ac;
+    outline: none;
+}
+
+button {
+    background-color: #5b34ac;
+    color: #ffffff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #7a4dd1;
+}
+
+button:active {
+    background-color: #444;
+}
+
+/* Calendar Styling */
+.available {
+    background-color: green !important;
+    color: white !important;
+}
+
+.unavailable {
+    background-color: red !important;
+    color: white !important;
+}
+
+.flatpickr-calendar {
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.flatpickr-day {
+    cursor: pointer;
+}
+
+.flatpickr-day.available {
+    background-color: green !important;
+    color: white !important;
+}
+
+.flatpickr-day.unavailable {
+    background-color: red !important;
+    color: white !important;
+}
+
+.flatpickr-day:hover {
+    background-color: #ddd !important;
+}
+
+@media screen and (max-width: 600px) {
+    .flatpickr-calendar {
+        width: 100% !important;
+    }
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 768px) {
+    .section-filters {
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    nav a {
+        font-size: 14px;
+    }
+
+    header h1 {
+        font-size: 2rem;
+    }
+
+    footer {
+        padding: 10px 0;
+    }
+}}

@@ -60,12 +60,15 @@ if (! $isLoggedIn) {
 }
 
 // fetch available flights for the destination and date
-$departure_date = $_POST['departure_date'] ?? '';
+$dateRangeStart = date('Y-m-d', strtotime($departure_date . ' -3 days')); // 3 days before the selected date
+$dateRangeEnd = date('Y-m-d', strtotime($departure_date . ' +3 days'));   // 3 days after the selected date
+
 $flightStmt = $conn->prepare("
     SELECT * FROM flights
-    WHERE destination_id = ? AND departure_date = ?
+    WHERE destination_id = ?
+    AND departure_date BETWEEN ? AND ?
 ");
-$flightStmt->bind_param('is', $flight['destination_id'], $departure_date);
+$flightStmt->bind_param('iss', $flight['destination_id'], $dateRangeStart, $dateRangeEnd);
 $flightStmt->execute();
 $flights = $flightStmt->get_result();
 $flightStmt->close();
