@@ -29,11 +29,6 @@ session_start(); // start the session
 
 
 		<main>
-			<section>
-				<h1>Welcome to Holiday Match</h1>
-				<p>Find and book your perfect trip!</p>
-			</section>
-
 			<section class="section-filters">
 				<!-- Form that submits selected keywords to the PHP filtering script -->
 				<form action="filter_destinations.php" method="POST">

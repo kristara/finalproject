@@ -23,6 +23,27 @@ header {
     text-align: center;
     padding: 40px 0;
     font-size: 28px;
+    background-image: url('images/header.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+header h1 {
+    position: relative;
+    z-index: 2;
+}
+
+header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(232, 226, 241, 0.6); /* Optional overlay for text clarity */
+    z-index: 1;
 }
 
 header h1 a {
@@ -36,48 +57,49 @@ header h1 a:hover {
     transition: 0.3s;
 }
 
+/* Top Links (Register, Log In) - Matched with Footer */
 #headerlinks ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
     text-align: right;
-    background: #222;
+    background-color: #e8e2f1;
 }
 
 #headerlinks li {
     display: inline;
-    margin-right: 15px;
+    margin-right: 10px;
 }
 
 #headerlinks a {
     text-decoration: none;
-    color: #ffffff;
-    padding: 10px;
+    color: #5b34ac;
     font-size: 14px;
 }
 
 #headerlinks a:hover {
-    color: #7a4dd1;
+    color: rgb(106, 35, 161);
 }
 
+/* Primary Navigation (Home, Explore, Book, Manage Booking) */
 #primarynav ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
     background-color: #5b34ac;
-    overflow: hidden;
     text-align: center;
 }
 
 #primarynav li {
     display: inline-block;
+    margin-right: 15px;
 }
 
 #primarynav a {
-    display: block;
-    color: #ffffff;
     text-decoration: none;
-    padding: 14px 20px;
+    color: #ffffff;
+    padding: 10px 15px;
+    font-size: 14px;
 }
 
 #primarynav a:hover {
@@ -85,42 +107,7 @@ header h1 a:hover {
     transition: 0.3s;
 }
 
-.current {
-    background-color: transparent;
-    font-weight: bold;
-}
-
-
-footer {
-    margin-top: auto;
-    background-color: #e8e2f1;
-    color: #5b34ac;
-    text-align: center;
-    padding: 20px;
-    font-size: 16px;
-}
-
-#footerlinks ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-#footerlinks li {
-    display: inline;
-    margin-right: 10px;
-}
-
-#footerlinks a {
-    text-decoration: none;
-    color: white;
-    font-size: 14px;
-}
-
-#footerlinks a:hover {
-    color: rgb(106, 35, 161);
-}
-/* Section Filters */
+/* Main Content and Filters */
 section {
     flex-grow: 1;
     padding: 20px;
@@ -137,11 +124,6 @@ section {
     max-width: 800px;
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.section-filters h2, .section-filters h3 {
-    color: #5b34ac;
-    margin-bottom: 10px;
 }
 
 .section-filters label {
@@ -161,9 +143,10 @@ section {
     display: none;
 }
 
-.section-filters input[type="checkbox"]:checked + label, .section-filters input[type="radio"]:checked + label {
+.section-filters input:checked + label {
     background-color: #c4b2e6;
     color: #fff;
+}
 
 /* Button Styling */
 .find-btn {
@@ -184,107 +167,34 @@ section {
     background-color: #7a4dd1;
 }
 
-/* Footer Styling - Fixed to Bottom */
+/* Footer */
 footer {
-    background-color: #5b34ac;
-    color: #ffffff;
+    background-color: #e8e2f1;
+    color: #5b34ac;
     text-align: center;
-    padding: 15px 0;
-    font-size: 14px;
-    position: relative;
-    bottom: 0;
-    width: 100%;
+    padding: 20px;
+    font-size: 16px;
 }
 
-footer a {
-    color: #ffffff;
+#footerlinks ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#footerlinks li {
+    display: inline;
+    margin-right: 10px;
+}
+
+#footerlinks a, #headerlinks a {
     text-decoration: none;
-    margin: 0 10px;
+    color: #5b34ac;
+    font-size: 14px;
 }
 
-footer a:hover {
-    text-decoration: underline;
-}
-
-/* Form Elements */
-form {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    box-sizing: border-box;
-}
-
-input[type="text"], input[type="date"], input[type="number"], select {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #c4b2e6;
-    border-radius: 10px;
-    font-size: 16px;
-}
-
-input:focus, select:focus {
-    border-color: #5b34ac;
-    outline: none;
-}
-
-button {
-    background-color: #5b34ac;
-    color: #ffffff;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #7a4dd1;
-}
-
-button:active {
-    background-color: #444;
-}
-
-/* Calendar Styling */
-.available {
-    background-color: green !important;
-    color: white !important;
-}
-
-.unavailable {
-    background-color: red !important;
-    color: white !important;
-}
-
-.flatpickr-calendar {
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-}
-
-.flatpickr-day {
-    cursor: pointer;
-}
-
-.flatpickr-day.available {
-    background-color: green !important;
-    color: white !important;
-}
-
-.flatpickr-day.unavailable {
-    background-color: red !important;
-    color: white !important;
-}
-
-.flatpickr-day:hover {
-    background-color: #ddd !important;
-}
-
-@media screen and (max-width: 600px) {
-    .flatpickr-calendar {
-        width: 100% !important;
-    }
+#footerlinks a:hover, #headerlinks a:hover {
+    color: rgb(106, 35, 161);
 }
 
 /* Mobile Responsiveness */
@@ -305,4 +215,4 @@ button:active {
     footer {
         padding: 10px 0;
     }
-}}
+}

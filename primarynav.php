@@ -1,5 +1,6 @@
 <header>
     <h1><a href="holidayMatch.php">Holiday Match</a></h1>
+    <h2>Find and book your perfect trip!</h2>
 </header>
 <nav id="primarynav">
     <ul>
