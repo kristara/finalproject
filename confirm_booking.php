@@ -32,8 +32,7 @@ $stmt = $conn->prepare("
         FROM flight_seats fs
         JOIN flights f ON fs.flight_id = f.flight_id
         JOIN destinations d ON f.destination_id = d.destination_id
-        WHERE fs.flight_id = ?
-            AND fs.seat_class = ?
+        WHERE fs.flight_id = ? AND fs.seat_class = ?
 ");
 $stmt->bind_param('is', $flight_id, $seat_class);
 $stmt->execute();
@@ -59,6 +58,18 @@ if (! $isLoggedIn) {
         'seat_class' => $seat_class,
     ];
 }
+
+// fetch available flights for the destination and date
+$departure_date = $_POST['departure_date'] ?? '';
+$flightStmt = $conn->prepare("
+    SELECT * FROM flights
+    WHERE destination_id = ? AND departure_date = ?
+");
+$flightStmt->bind_param('is', $flight['destination_id'], $departure_date);
+$flightStmt->execute();
+$flights = $flightStmt->get_result();
+$flightStmt->close();
+
 ?>
 
 <!DOCTYPE html>

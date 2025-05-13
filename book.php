@@ -28,7 +28,7 @@ if ($destination_id > 0) {
 
 // fetch full destination list for the select dropdown
 $allDestStmt = $conn->query("
-    SELECT destination_id, name, country
+    SELECT DISTINCT destination_id, name, country
     FROM destinations
     ORDER BY name
 ");
@@ -78,7 +78,7 @@ $allDestStmt = $conn->query("
                         <?php while ($row = $allDestStmt->fetch_assoc()): ?>
                             <option
                                 value="<?= $row['destination_id'] ?>"
-                                <?= $row['destination_id'] === $destination_id ? 'selected' : '' ?>
+                                <?= (int)$row['destination_id'] === (int)$destination_id ? 'selected' : '' ?>
                             >
                                 <?= htmlspecialchars($row['name']) ?>,
                                 <?= htmlspecialchars($row['country']) ?>
