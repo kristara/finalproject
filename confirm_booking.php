@@ -1,82 +1,125 @@
 <?php
-include 'config.php'; // database connection
+session_start(); // start the session
+require_once 'config.php'; // database connection
 
-// check for required POST values
-if (!isset($_POST['flight_id'], $_POST['number_of_passengers'], $_POST['seat_class'])) {
+//validate incoming form data
+if (
+    empty($_POST['flight_id']) ||
+    empty($_POST['number_of_passengers']) ||
+    empty($_POST['seat_class'])
+) {
     exit("Missing flight selection.");
 }
 
-$flight_id = intval($_POST['flight_id']);
-$passengers = intval($_POST['number_of_passengers']);
+$flight_id  = (int) $_POST['flight_id'];
+$passengers = max(1, (int) $_POST['number_of_passengers']);
 $seat_class = $_POST['seat_class'];
 
-//validate seat class
-$valid_classes = ['economy', 'business', 'first class'];
-if (!in_array($seat_class, $valid_classes)) {
+//ensure the seat_class matches your enum
+$valid = ['economy','business','first'];
+if (! in_array($seat_class, $valid, true)) {
     exit("Invalid seat class.");
 }
 
-// get full flight details
-$seat_column = match($seat_class) {
-    'economy' => 'economy_seats',
-    'business' => 'business_seats',
-    'first class' => 'first_class_seats',
-};
-
-$sql = "SELECT f.*, d.name AS destination_name, d.country
-        FROM flights f
+//fetch price and availability from flight_seats
+$stmt = $conn->prepare("
+        SELECT
+            fs.price_per_seat,
+            fs.available_seats,
+            d.name   AS destination_name,
+            d.country AS destination_country,
+            f.departure_date
+        FROM flight_seats fs
+        JOIN flights f ON fs.flight_id = f.flight_id
         JOIN destinations d ON f.destination_id = d.destination_id
-        WHERE f.flight_id = ?";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $flight_id);
+        WHERE fs.flight_id = ?
+            AND fs.seat_class = ?
+");
+$stmt->bind_param('is', $flight_id, $seat_class);
 $stmt->execute();
-$result = $stmt->get_result();
+$flight = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
-if ($result->num_rows === 0) {
-    exit("Flight not found.");
+if (! $flight) {
+    exit("Flight or class not found.");
+}
+if ($flight['available_seats'] < $passengers) {
+    exit("Only {$flight['available_seats']} seats left in {$seat_class} class.");
 }
 
-$flight = $result->fetch_assoc();
-$available = $flight[$seat_column];
+//calculate total
+$total      = $flight['price_per_seat'] * $passengers;
+$isLoggedIn = isset($_SESSION['user_id']);
+
+// if a guest user then store pending in session
+if (! $isLoggedIn) {
+    $_SESSION['pending_booking'] = [
+        'flight_id'  => $flight_id,
+        'passengers' => $passengers,
+        'seat_class' => $seat_class,
+    ];
+}
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Confirm Your Booking</title>
+    <meta charset="UTF-8">
+    <title>Confirm Booking</title>
+    <link rel="stylesheet" href="css.css">
 </head>
+
 <body>
-    <h2>Confirm Booking</h2>
+    <div id="pagewrapper">
+        <nav id="headerlinks">
+            <ul>
+                <?php if ($isLoggedIn): ?>
+                    <li><a href="account.php">My Account</a></li>
+                    <li><a href="logout.php">Log Out</a></li>
+                <?php else: ?>
+                    <li><a href="registration.php">Register</a></li>
+                    <li><a href="login.php">Log In</a></li>
+                <?php endif; ?>
+            </ul>
+        </nav>
 
-    <p><strong>Destination:</strong> <?php echo htmlspecialchars($flight['destination_name']) . ", " . htmlspecialchars($flight['country']); ?></p>
-    <p><strong>Departure:</strong> <?php echo $flight['departure_time']; ?></p>
-    <p><strong>Arrival:</strong> <?php echo $flight['arrival_time']; ?></p>
-    <p><strong>Seat Class:</strong> <?php echo htmlspecialchars($seat_class); ?></p>
-    <p><strong>Passengers:</strong> <?php echo $passengers; ?></p>
-    <p><strong>Available Seats:</strong> <?php echo $available; ?></p>
+        <!-- shared header and primary nav -->
+        <?php include 'primarynav.php'; ?>
 
-    <?php if ($available < $passengers): ?>
-        <p style="color:red;">Flight is sold out.</p>
-    <?php else: ?>
-        <form action="finalise_booking.php" method="POST">
-            <label for="user_id">Enter your User ID:</label>
-            <input type="number" name="user_id" id="user_id" required><br><br>
+        <main>
+            <h1>Confirm Your Booking</h1>
+            <p><strong>Destination:</strong>
+                <?= htmlspecialchars($flight['destination_name']) ?>,
+                <?= htmlspecialchars($flight['destination_country']) ?>
+            </p>
+            <p><strong>Departure Date:</strong>
+                <?= htmlspecialchars($flight['departure_date']) ?>
+            </p>
+            <p><strong>Class:</strong>
+                <?= htmlspecialchars(ucfirst($seat_class)) ?>
+            </p>
+            <p><strong>Passengers:</strong> <?= $passengers ?></p>
+            <p><strong>Price per Seat:</strong>
+                £<?= number_format($flight['price_per_seat'],2) ?>
+            </p>
+            <p><strong>Total Price:</strong>
+                £<?= number_format($total,2) ?>
+            </p>
 
-            <!-- Pass booking data forward -->
-            <input type="hidden" name="flight_id" value="<?php echo $flight_id; ?>">
-            <input type="hidden" name="number_of_passengers" value="<?php echo $passengers; ?>">
-            <input type="hidden" name="seat_class" value="<?php echo htmlspecialchars($seat_class); ?>">
-
-            <button type="submit">Confirm Booking</button>
-        </form>
-    <?php endif; ?>
-
+            <?php if ($isLoggedIn): ?>
+                <form action="finalise_booking.php" method="POST">
+                    <input type="hidden" name="confirm" value="1">
+                    <button type="submit">Confirm Booking</button>
+                </form>
+            <?php else: ?>
+                <p>
+                    Please <a href="login.php">log in</a> or
+                    <a href="registration.php">register</a>
+                    to complete your booking.
+                </p>
+            <?php endif; ?>
+        </main>
+        <?php include 'footerlinks.php'; ?>
+    </div>
 </body>
 </html>
-
-// Close the database connection
-<?php
-$stmt->close();
-$conn->close();
-?>

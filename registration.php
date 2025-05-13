@@ -3,48 +3,52 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include 'config.php';
+session_start();           //start session
+require_once 'config.php'; // db connection
 
-$message = ""; // Initialise message variable
+$message = ""; // initialise message variable
 
-// Force check for REQUEST_METHOD to avoid errors
-if (isset($_SERVER) && array_key_exists('REQUEST_METHOD', $_SERVER) && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Form data and trim whitespace
-    $first_name = trim(htmlspecialchars($_POST['first_name'] ?? ''));
-    $middle_name = trim(htmlspecialchars($_POST['middle_name'] ?? ''));
-    $last_name = trim(htmlspecialchars($_POST['last_name'] ?? ''));
-    $email = trim(htmlspecialchars($_POST['email'] ?? ''));
-    $password = trim($_POST['password'] ?? '');
+// force check for REQUEST_METHOD to avoid errors
+if (!empty($_POST['first_name']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    // form data and trim whitespace
+    $first_name   = trim(htmlspecialchars($_POST['first_name'] ?? ''));
+    $middle_name  = trim(htmlspecialchars($_POST['middle_name'] ?? ''));
+    $last_name    = trim(htmlspecialchars($_POST['last_name'] ?? ''));
+    $email        = trim(htmlspecialchars($_POST['email'] ?? ''));
+    $password     = $_POST['password'] ?? '';
     $phone_number = trim(htmlspecialchars($_POST['phone_number'] ?? ''));
-    $post_code = trim(htmlspecialchars($_POST['post_code'] ?? ''));
-    $city = trim(htmlspecialchars($_POST['city'] ?? ''));
-    $country = trim(htmlspecialchars($_POST['country'] ?? ''));
-    $dob = trim($_POST['dob'] ?? '');
-    $address = trim(htmlspecialchars($_POST['address'] ?? ''));
+    $city         = trim(htmlspecialchars($_POST['city'] ?? ''));
+    $post_code    = trim(htmlspecialchars($_POST['post_code'] ?? ''));
+    $country      = trim(htmlspecialchars($_POST['country'] ?? ''));
+    $dob          = $_POST['dob'] ?? '';
+    $address      = trim(htmlspecialchars($_POST['address'] ?? ''));
 
-    // Validate email format
+    // validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $message = "<div class='error-message'>Invalid email format.</div>";
-    } elseif (strlen($password) < 8 || !preg_match("/[A-Za-z]/", $password) || !preg_match("/[0-9]/", $password)) {
+        $message = '<div class="error-message">Invalid email format.</div>';
+    } elseif (strlen($password) < 8
+                || !preg_match("/[A-Za-z]/", $password)
+                || !preg_match("/[0-9]/", $password)) {
         $message = "<div class='error-message'>Password must be at least 8 characters long and contain both letters and numbers.</div>";
     } else {
-        // Check if email already exists
-        $email_check = "SELECT email FROM users WHERE email = ?";
-        $stmt = $conn->prepare($email_check);
-        $stmt->bind_param("s", $email);
+        // check if email already exists
+        $stmt = $conn->prepare('SELECT 1 FROM users WHERE email = ?');
+        $stmt->bind_param('s', $email);
         $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->store_result();
 
-        if ($result->num_rows > 0) {
+        if ($stmt->num_rows > 0) {
             $message = "<div class='error-message'>An account with this email already exists.</div>";
+            $stmt->close();
         } else {
-            // Hash the password
+            $stmt->close();
+
+            // hash the password
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            // Insert user data into the database
-            $query = "INSERT INTO users (first_name, middle_name, last_name, email, password_hash, phone_number, post_code, city, country, dob, address)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            $stmt = $conn->prepare($query);
+            // insert user data into the database
+            $stmt = $conn->prepare( "INSERT INTO users (first_name, middle_name, last_name, email, password_hash, phone_number, post_code, city, country, dob, address)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->bind_param(
                 "sssssssssss",
                 $first_name,
@@ -61,9 +65,19 @@ if (isset($_SERVER) && array_key_exists('REQUEST_METHOD', $_SERVER) && $_SERVER[
             );
 
             if ($stmt->execute()) {
-                $message = "<div class='success-message'>Registration successful! You can now <a href='login.php'>log in here</a>.</div>";
+                $message = "<div class='success-message'>
+                    Registration successful! You can now <a href='login.php'>log in here</a>.
+                </div>";
+
+                // if a user comes from a guest booking then finish that
+                if (isset($_SESSION['pending_booking'])) {
+                    header('Location: finalise_booking.php');
+                    exit;
+                }
             } else {
-                $message = "<div class='error-message'>Error during registration: " . $conn->error . "</div>";
+                $message = "<div class='error-message'>
+                    Error during registration: " . $conn->error . "
+                </div>";
             }
         }
         $stmt->close();
@@ -75,7 +89,7 @@ $conn->close();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Registration - HolidayMatch</title>
+    <title>Register</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css.css">
     <style>
@@ -89,85 +103,68 @@ $conn->close();
     <div id="pagewrapper">
         <nav id="headerlinks">
 			<ul>
-				<?php
-                session_start();
-                if (isset($_SESSION['user_id'])) {
-                    echo '<li><a href="account.php">My Account</a></li>';
-                    echo '<li><a href="logout.php">Log Out</a></li>';
-                } else {
-                    echo '<li><a href="registration.php">Register</a></li>';
-                    echo '<li><a href="login.php">Log In</a></li>';
-                }
-                ?>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <li><a href="account.php">My Account</a></li>
+                    <li><a href="logout.php">Log Out</a></li>
+                <?php else: ?>
+                    <li><a href="registration.php">Register</a></li>
+                    <li><a href="login.php">Log In</a></li>
+                <?php endif; ?>
 			</ul>
 		</nav>
-        <header>
-            <h1><a href="holidayMatch.html">Holiday Match</a></h1>
-        </header>
 
-        <nav id="primarynav">
-            <ul>
-                <li><a href="holidayMatch.html">Home</a></li>
-                <li><a href="explore.html">Explore</a></li>
-                <li><a href="/book.php">Book</a></li>
-                <li><a href="/managebooking.php">Manage Booking</a></li>
-            </ul>
-        </nav>
+        <!-- shared header and primary nav -->
+        <?php include 'primarynav.php'; ?>
 
-        <section>
-            <h2>Register</h2>
-            <form action="registration.php" method="POST">
-                <label>First Name:</label>
-                <input type="text" name="first_name" required><br><br>
+        <main>
+            <section>
+                <h1>Register</h1>
+                <form action="registration.php" method="POST">
+                    <label>First Name:</label>
+                    <input type="text" name="first_name" required><br><br>
 
-                <label>Middle Name (optional):</label>
-                <input type="text" name="middle_name"><br><br>
+                    <label>Middle Name (optional):</label>
+                    <input type="text" name="middle_name"><br><br>
 
-                <label>Last Name:</label>
-                <input type="text" name="last_name" required><br><br>
+                    <label>Last Name:</label>
+                    <input type="text" name="last_name" required><br><br>
 
-                <label>Email:</label>
-                <input type="email" name="email" required><br><br>
+                    <label>Email:</label>
+                    <input type="email" name="email" required><br><br>
 
-                <label>Password:</label>
-                <input type="password" name="password" required><br><br>
+                    <label>Password:</label>
+                    <input type="password" name="password" required><br><br>
 
-                <label>Phone Number (optional):</label>
-                <input type="text" name="phone_number"><br><br>
+                    <label>Phone Number (optional):</label>
+                    <input type="text" name="phone_number"><br><br>
 
-                <label>City:</label>
-                <input type="text" name="city" required><br><br>
+                    <label>City:</label>
+                    <input type="text" name="city" required><br><br>
 
-                <label>Post Code:</label>
-                <input type="text" name="post_code" required><br><br>
+                    <label>Post Code:</label>
+                    <input type="text" name="post_code" required><br><br>
 
-                <label>Country:</label>
-                <input type="text" name="country" required><br><br>
+                    <label>Country:</label>
+                    <input type="text" name="country" required><br><br>
 
-                <label>Date of Birth:</label>
-                <input type="date" name="dob" required><br><br>
+                    <label>Date of Birth:</label>
+                    <input type="date" name="dob" required><br><br>
 
-                <label>Address (optional):</label>
-                <input type="text" name="address"><br><br>
+                    <label>Address (optional):</label>
+                    <input type="text" name="address"><br><br>
 
-                <button type="submit">Register</button>
-            </form>
-        </section>
+                    <button type="submit">Register</button>
+                </form>
 
-        <!-- Display message box -->
-        <div class="message-box">
-            <?php if (!empty($message)) echo $message; ?>
-        </div>
+                <div class="message-box">
+                    <?= $message ?>
+                </div>
+            </section>
+        </main>
 
-        <footer>
-            <nav id="footerlinks">
-                <ul>
-                    <li><a href="termsofuse.html">Terms of Use &#124;</a></li>
-                    <li><a href="copyright.html">Copyright &#124;</a></li>
-                    <li><a href="contactus.html">Contact Us</a></li>
-                </ul>
-            </nav>
-        </footer>
+        <!-- shared footer -->
+        <?php include 'footerlinks.php'; ?>
+
     </div>
 </body>
 </html>
