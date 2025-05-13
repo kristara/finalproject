@@ -42,7 +42,11 @@ header::after {
     left: 0;
     width: 100%;
     height: 100%;
+<<<<<<< HEAD
     background: rgba(232, 226, 241, 0.6);
+=======
+    background: rgba(232, 226, 241, 0.6); /* Optional overlay for text clarity */
+>>>>>>> a2f0a3359efcd696bbc1b592cd5f6e22d859b551
     z-index: 1;
 }
 
@@ -57,7 +61,11 @@ header h1 a:hover {
     transition: 0.3s;
 }
 
+<<<<<<< HEAD
 /* Register, Log In */
+=======
+/* Top Links (Register, Log In) - Matched with Footer */
+>>>>>>> a2f0a3359efcd696bbc1b592cd5f6e22d859b551
 #headerlinks ul {
     list-style-type: none;
     padding: 0;
