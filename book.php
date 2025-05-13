@@ -7,6 +7,7 @@ $isLoggedIn = isset($_SESSION['user_id']);
 
 // initialise variables
 $destination_id      = intval($_GET['destination_id'] ?? 0);
+$departure_date      = $_GET['departure_date'] ?? ''; // Capture departure_date from URL
 $destination_name    = '';
 $destination_country = '';
 
@@ -32,6 +33,7 @@ $allDestStmt = $conn->query("
     FROM destinations
     ORDER BY name
 ");
+
 ?>
 
 <!DOCTYPE html>
@@ -46,14 +48,14 @@ $allDestStmt = $conn->query("
     <div id="pagewrapper">
         <nav id="headerlinks">
             <ul>
-				<?php if ($isLoggedIn): ?>
+                <?php if ($isLoggedIn): ?>
                     <li><a href="account.php">My Account</a></li>
                     <li><a href="logout.php">Log Out</a></li>
                 <?php else: ?>
                     <li><a href="registration.php">Register</a></li>
                     <li><a href="login.php">Log In</a></li>
                 <?php endif; ?>
-			</ul>
+            </ul>
         </nav>
 
         <!-- shared header and primary nav -->
@@ -86,9 +88,12 @@ $allDestStmt = $conn->query("
                         <?php endwhile; ?>
                     </select><br><br>
 
-                    <!-- departure date input -->
+                    <!-- hidden flight_id field to pass selected destination_id -->
+                    <input type="hidden" name="flight_id" value="<?= $destination_id ?>">
+
+                    <!-- departure date input (dynamically populated) -->
                     <label>Departure Date:</label>
-                    <input type="date" name="departure_date" required><br><br>
+                    <input type="date" name="departure_date" value="<?= htmlspecialchars($departure_date) ?>" required><br><br>
 
                     <!-- number of passengers -->
                     <label>Number of Passengers:</label>
@@ -111,10 +116,10 @@ $allDestStmt = $conn->query("
                     <button type="submit">Proceed</button>
                 </form>
             </section>
-    	</main>
+        </main>
 
-	    <!-- shared footer -->
-	    <?php include 'footerlinks.php'; ?>
+        <!-- shared footer -->
+        <?php include 'footerlinks.php'; ?>
     </div>
 </body>
 </html>

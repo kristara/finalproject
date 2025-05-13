@@ -130,6 +130,7 @@ $flightStmt->close();
                 </p>
             <?php endif; ?>
         </main>
+
         <?php include 'footerlinks.php'; ?>
     </div>
 </body>
