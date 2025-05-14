@@ -2,11 +2,13 @@
 session_start(); // start the session
 require_once 'config.php';// database connection
 
+var_dump($_POST); // check incoming POST data
+
 $error  = '';
 $results = null;
 
 //collect and validate filter inputs
-$keywords     = $_POST['keywords']     ?? [];
+$keywords     = $_POST['keywords'] ?? [];
 $price_ranges = $_POST['price_ranges'] ?? [];
 
 if (!is_array($keywords) || empty($keywords)) {
@@ -18,15 +20,17 @@ if (!is_array($keywords) || empty($keywords)) {
     $types        = '';
 
     //keyword filter
-    $placeholders = implode(',', array_fill(0, count($keywords), '?'));
-    $whereClauses[] = "d.destination_id IN (
-        SELECT destination_id
+    if (count($keywords) > 0) {
+        $placeholders = implode(',', array_fill(0, count($keywords), '?'));
+        $whereClauses[] = "d.destination_id IN (
+            SELECT destination_id
             FROM destination_keywords
             WHERE keyword IN ($placeholders)
-    )";
-    foreach ($keywords as $kw) {
-        $types    .= 's';
-        $params[]  = $kw;
+        )";
+        foreach ($keywords as $kw) {
+            $types    .= 's';
+            $params[]  = $kw;
+        }
     }
 
     //price range filter on fs.price_per_seat
@@ -34,7 +38,7 @@ if (!is_array($keywords) || empty($keywords)) {
         $sub = [];
         foreach ($price_ranges as $range) {
             list($min, $max) = explode('-', $range);
-            $sub[]    = "(fs.price_per_seat BETWEEN ? AND ?)";
+            $sub[] = "(fs.price_per_seat BETWEEN ? AND ?)";
             $types   .= 'dd';
             $params[] = (float)$min;
             $params[] = (float)$max;
@@ -43,10 +47,7 @@ if (!is_array($keywords) || empty($keywords)) {
     }
 
     // combine
-    $whereSQL = '';
-    if ($whereClauses) {
-        $whereSQL = 'AND ' . implode(' AND ', $whereClauses);
-    }
+    $whereSQL = $whereClauses ? ' AND ' . implode(' AND ', $whereClauses) : '';
 
     // query matching destinations
     $sql = "
@@ -57,13 +58,9 @@ if (!is_array($keywords) || empty($keywords)) {
             MIN(fs.price_per_seat)   AS economy_price,
             SUM(fs.available_seats)  AS total_economy_seats
         FROM destinations d
-        JOIN flights f
-            ON f.destination_id = d.destination_id
-        JOIN flight_seats fs
-            ON fs.flight_id  = f.flight_id
-            AND fs.seat_class = 'economy'
-        WHERE 1=1
-            {$whereSQL}
+        JOIN flights f ON f.destination_id = d.destination_id
+        JOIN flight_seats fs ON fs.flight_id = f.flight_id AND fs.seat_class = 'economy'
+        WHERE 1=1 {$whereSQL}
         GROUP BY d.destination_id, d.name, d.country
         ORDER BY economy_price ASC
     ";
@@ -112,37 +109,30 @@ $conn->close();
 
 
 		<main>
+
             <h1>Available Destinations</h1>
 
             <?php if ($error): ?>
                 <p class="error-message"><?= htmlspecialchars($error) ?></p>
-
             <?php elseif ($results && $results->num_rows === 0): ?>
                 <p>No destinations found for your selected preferences.</p>
-
             <?php elseif ($results): ?>
                 <ul class="destination-list">
                     <?php while ($row = $results->fetch_assoc()): ?>
                         <li>
-                            <h2>
-                                <?= htmlspecialchars($row['name']) ?>
-                                (<?= htmlspecialchars($row['country']) ?>)
-                            </h2>
+                            <h2><?= htmlspecialchars($row['name']) ?> (<?= htmlspecialchars($row['country']) ?>)</h2>
                             <p>
                                 From £<?= number_format($row['economy_price'], 2) ?>
-                                &mdash; <?= intval($row['total_economy_seats']) ?>
-                                seats available in Economy
+                                — <?= intval($row['total_economy_seats']) ?> seats available in Economy
                             </p>
-                            <a href="book.php?destination_id=<?= $row['destination_id'] ?>">
-                                Book Now
-                            </a>
+                            <a href="book.php?destination_id=<?= $row['destination_id'] ?>" class="book-btn">Book Now</a>
                         </li>
                     <?php endwhile; ?>
                 </ul>
             <?php endif; ?>
         </main>
 
-        <!-- Footer -->
+        <!-- shared footer -->
         <?php include 'footerlinks.php'; ?>
 
     </div>
