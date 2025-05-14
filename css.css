@@ -1,4 +1,4 @@
-/* General Styles */
+/* General styles */
 html, body {
     height: 100%;
     margin: 0;
@@ -14,9 +14,9 @@ html, body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    padding: 0;
 }
 
+/* Header */
 header {
     background-color: #e8e2f1;
     color: #5b34ac;
@@ -31,8 +31,8 @@ header {
 }
 
 header h1 {
-    position: relative;
     z-index: 2;
+    position: relative;
 }
 
 header::after {
@@ -42,23 +42,22 @@ header::after {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(232, 226, 241, 0.6); /* Optional overlay for text clarity */
+    background: rgba(232, 226, 241, 0.6);
     z-index: 1;
 }
 
-header h1 a {
-    text-decoration: none;
+/* Link*/
+a {
     color: #5b34ac;
-    font-weight: bold;
+    text-decoration: none;
 }
 
-header h1 a:hover {
+a:hover {
     color: #7a4dd1;
-    transition: 0.3s;
 }
 
-/* Top Links (Register, Log In) - Matched with Footer */
-#headerlinks ul {
+/* Navigation */
+#headerlinks ul, #footerlinks ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
@@ -66,22 +65,11 @@ header h1 a:hover {
     background-color: #e8e2f1;
 }
 
-#headerlinks li {
+#headerlinks li, #footerlinks li {
     display: inline;
     margin-right: 10px;
 }
 
-#headerlinks a {
-    text-decoration: none;
-    color: #5b34ac;
-    font-size: 14px;
-}
-
-#headerlinks a:hover {
-    color: rgb(106, 35, 161);
-}
-
-/* Primary Navigation (Home, Explore, Book, Manage Booking) */
 #primarynav ul {
     list-style-type: none;
     padding: 0;
@@ -92,7 +80,6 @@ header h1 a:hover {
 
 #primarynav li {
     display: inline-block;
-    margin-right: 15px;
 }
 
 #primarynav a {
@@ -104,10 +91,19 @@ header h1 a:hover {
 
 #primarynav a:hover {
     background-color: #7a4dd1;
-    transition: 0.3s;
 }
 
-/* Main Content and Filters */
+/* Form*/
+.centered-form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Main content */
 section {
     flex-grow: 1;
     padding: 20px;
@@ -117,39 +113,8 @@ section {
     margin: 0 auto;
 }
 
-.section-filters {
-    background-color: #ffffff;
-    padding: 25px 30px;
-    margin: 20px auto;
-    max-width: 800px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.section-filters label {
-    display: inline-flex;
-    align-items: center;
-    background-color: #f0eff8;
-    color: #333;
-    padding: 8px 12px;
-    margin: 5px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.3s;
-}
-
-.section-filters input[type="checkbox"], .section-filters input[type="radio"] {
-    display: none;
-}
-
-.section-filters input:checked + label {
-    background-color: #c4b2e6;
-    color: #fff;
-}
-
-/* Button Styling */
-.find-btn {
+/* Button */
+button.find-btn, input[type="submit"] {
     background-color: #5b34ac;
     color: #fff;
     padding: 12px 24px;
@@ -157,13 +122,9 @@ section {
     border-radius: 12px;
     cursor: pointer;
     font-size: 1rem;
-    display: block;
-    width: 100%;
-    text-align: center;
-    margin-top: 15px;
 }
 
-.find-btn:hover {
+button.find-btn:hover, input[type="submit"]:hover {
     background-color: #7a4dd1;
 }
 
@@ -176,32 +137,36 @@ footer {
     font-size: 16px;
 }
 
-#footerlinks ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+/* Filter */
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin: 15px 0;
 }
 
-#footerlinks li {
-    display: inline;
-    margin-right: 10px;
+.filter-option, .filter-price {
+    background-color: #f0eff8;
+    border: none;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
 }
 
-#footerlinks a, #headerlinks a {
-    text-decoration: none;
-    color: #5b34ac;
-    font-size: 14px;
+.filter-option.active, .filter-price.active {
+    background-color: #5b34ac;
+    color: #ffffff;
 }
 
-#footerlinks a:hover, #headerlinks a:hover {
-    color: rgb(106, 35, 161);
-}
-
-/* Mobile Responsiveness */
+/* Mobile responsiveness */
 @media screen and (max-width: 768px) {
-    .section-filters {
-        max-width: 100%;
-        padding: 20px;
+    .centered-form {
+        max-width: 90%;
+        padding: 15px;
     }
 
     nav a {

@@ -33,27 +33,31 @@ session_start(); // start the session
 				<!-- Form that submits selected keywords to the PHP filtering script -->
 				<form action="filter_destinations.php" method="POST">
 					<h2>Choose destination features:</h2>
-					<div class="feature-options">
-						<label><input type="checkbox" name="keywords[]" value="beach"> 🏖 Beach</label>
-						<label><input type="checkbox" name="keywords[]" value="city"> 🏙 City</label>
-						<label><input type="checkbox" name="keywords[]" value="mountains"> 🏔 Mountains</label>
-						<label><input type="checkbox" name="keywords[]" value="snow"> ❄️ Snow</label>
-						<label><input type="checkbox" name="keywords[]" value="adventure"> 🚵‍♂️ Adventure</label>
-						<label><input type="checkbox" name="keywords[]" value="luxury"> 💎 Luxury</label>
-						<label><input type="checkbox" name="keywords[]" value="budget"> 💰 Budget</label>
-						<label><input type="checkbox" name="keywords[]" value="cultural"> 🏛 Cultural</label>
-						<label><input type="checkbox" name="keywords[]" value="island"> 🏝 Island</label>
-						<label><input type="checkbox" name="keywords[]" value="romantic"> ❤️ Romantic</label>
+					<div class="filter-buttons">
+						<button type="button" class="filter-option" data-value="beach">🏖️ Beach</button>
+						<button type="button" class="filter-option" data-value="city">🏙️ City</button>
+						<button type="button" class="filter-option" data-value="mountains">⛰️ Mountains</button>
+						<button type="button" class="filter-option" data-value="snow">❄️ Snow</button>
+						<button type="button" class="filter-option" data-value="adventure">🏕️ Adventure</button>
+						<button type="button" class="filter-option" data-value="luxury">💎 Luxury</button>
+						<button type="button" class="filter-option" data-value="budget">💰 Budget</button>
+						<button type="button" class="filter-option" data-value="cultural">🏛️ Cultural</button>
+						<button type="button" class="filter-option" data-value="island">🏝️ Island</button>
+						<button type="button" class="filter-option" data-value="romantic">❤️ Romantic</button>
 					</div>
 
 					<!--  filters for price -->
 					<h3>Price Range</h3>
-					<div class="price-options">
-						<label><input type="radio" name="price_ranges[]" value="0-500"> Under £500</label>
-						<label><input type="radio" name="price_ranges[]" value="500-1000"> £500 - £1,000</label>
-						<label><input type="radio" name="price_ranges[]" value="1000-2000"> £1,000 - £2,000</label>
-						<label><input type="radio" name="price_ranges[]" value="2000-3000"> £2,000 - £3,000</label>
+					<div class="filter-buttons">
+						<button type="button" class="filter-price" data-value="under_500">Under £500</button>
+						<button type="button" class="filter-price" data-value="500_1000">£500 - £1,000</button>
+						<button type="button" class="filter-price" data-value="1000_2000">£1,000 - £2,000</button>
+						<button type="button" class="filter-price" data-value="2000_3000">£2,000 - £3,000</button>
 					</div>
+
+					<form action="explore.php" method="GET">
+							<input type="hidden" name="keywords" id="selected-keywords">
+							<input type="hidden" name="price_range" id="selected-price-range">
 
 					<!-- Submit button to trigger PHP filter script -->
 					<button type="submit" class="find-btn">Find Destinations</button>
@@ -63,6 +67,40 @@ session_start(); // start the session
 
 		<!-- shared footer -->
 		<?php include 'footerlinks.php'; ?>
+
+		<!-- javaScript for Toggle Effect -->
+				
+		<script>
+			document.addEventListener("DOMContentLoaded", function() {
+				// Toggle selection for destination features
+				document.querySelectorAll(".filter-option").forEach(button => {
+					button.addEventListener("click", function() {
+						this.classList.toggle("active");
+						updateSelectedKeywords();
+					});
+				});
+
+				// selection for price range
+				document.querySelectorAll(".filter-price").forEach(button => {
+					button.addEventListener("click", function() {
+						document.querySelectorAll(".filter-price").forEach(btn => btn.classList.remove("active"));
+						this.classList.add("active");
+						updateSelectedPrice();
+					});
+				});
+
+				function updateSelectedKeywords() {
+					const selectedKeywords = Array.from(document.querySelectorAll(".filter-option.active"))
+						.map(button => button.getAttribute("data-value"));
+					document.getElementById("selected-keywords").value = selectedKeywords.join(",");
+				}
+
+				function updateSelectedPrice() {
+					const selectedPrice = document.querySelector(".filter-price.active")?.getAttribute("data-value") || "";
+					document.getElementById("selected-price-range").value = selectedPrice;
+				}
+			});
+		</script>
 
 	</div>
 </body>

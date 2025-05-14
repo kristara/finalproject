@@ -11,17 +11,17 @@ $message = ""; // initialise message variable
 // force check for REQUEST_METHOD to avoid errors
 if (!empty($_POST['first_name']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // form data and trim whitespace
-    $first_name   = trim(htmlspecialchars($_POST['first_name'] ?? ''));
-    $middle_name  = trim(htmlspecialchars($_POST['middle_name'] ?? ''));
-    $last_name    = trim(htmlspecialchars($_POST['last_name'] ?? ''));
-    $email        = trim(htmlspecialchars($_POST['email'] ?? ''));
+    $first_name   = htmlspecialchars(trim($_POST['first_name'] ?? ''));
+    $middle_name  = htmlspecialchars(trim($_POST['middle_name'] ?? ''));
+    $last_name    = htmlspecialchars(trim($_POST['last_name'] ?? ''));
+    $email        = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
     $password     = $_POST['password'] ?? '';
-    $phone_number = trim(htmlspecialchars($_POST['phone_number'] ?? ''));
-    $city         = trim(htmlspecialchars($_POST['city'] ?? ''));
-    $post_code    = trim(htmlspecialchars($_POST['post_code'] ?? ''));
-    $country      = trim(htmlspecialchars($_POST['country'] ?? ''));
+    $phone_number = htmlspecialchars(trim($_POST['phone_number'] ?? ''));
+    $city         = htmlspecialchars(trim($_POST['city'] ?? ''));
+    $post_code    = htmlspecialchars(trim($_POST['post_code'] ?? ''));
+    $country      = htmlspecialchars(trim($_POST['country'] ?? ''));
     $dob          = $_POST['dob'] ?? '';
-    $address      = trim(htmlspecialchars($_POST['address'] ?? ''));
+    $address      = htmlspecialchars(trim($_POST['address'] ?? ''));
 
     // validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -65,19 +65,21 @@ if (!empty($_POST['first_name']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
             );
 
             if ($stmt->execute()) {
-                $message = "<div class='success-message'>
-                    Registration successful! You can now <a href='login.php'>log in here</a>.
-                </div>";
+                // set session variables
+                $_SESSION['user_id'] = $conn->insert_id;
+                $_SESSION['email'] = $email;
 
-                // if a user comes from a guest booking then finish that
+                // redirect to finalise booking if pending
                 if (isset($_SESSION['pending_booking'])) {
                     header('Location: finalise_booking.php');
                     exit;
                 }
-            } else {
-                $message = "<div class='error-message'>
-                    Error during registration: " . $conn->error . "
+
+                $message = "<div class='success-message'>
+                    Registration successful! You can now <a href='login.php'>log in here</a>.
                 </div>";
+            } else {
+                $message = "<div class='error-message'>Error during registration: " . $conn->error . "</div>";
             }
         }
         $stmt->close();
