@@ -60,7 +60,7 @@ header::after {
 /* Forms for register/Login/Modify/Manage.. */
 .centered-form {
     max-width: 500px;
-    margin: 10 auto;
+    margin: 10px auto;
     padding: 20px 30px;
     background-color: #ffffff;
     border-radius: 20px;
@@ -72,21 +72,7 @@ header::after {
     display: flex;
     flex-direction: column;
     gap: 15px;
-}
-
-.centered-form label {
-    font-weight: bold;
-    color: #5b34ac;
-    text-align: left;
-}
-
-.centered-form input {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f7f6fb;
-    font-size: 16px;
 }
 
 .centered-form .form-group {
@@ -94,22 +80,34 @@ header::after {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 15px;
-    gap: 8px;
+    gap: 10px;
 }
 
-.centered-form form .form-group label {
+.centered-form label {
     font-weight: bold;
     color: #5b34ac;
     width: 130px;
-    text-align: right;
-    margin-right: 10px;
+    text-align: center;
+}
+
+.centered-form input,
+.centered-form select {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f7f6fb;
+    font-size: 16px;
+    box-sizing: border-box;
 }
 
 .centered-form input[type="text"],
 .centered-form input[type="email"],
 .centered-form input[type="password"],
 .centered-form input[type="date"],
-.centered-form input[type="submit"] {
+.centered-form input[type="number"],
+.centered-form select {
     flex: 1;
     padding: 10px;
     border: 1px solid #ddd;
@@ -146,17 +144,6 @@ header::after {
     font-size: 24px;
     color: #5b34ac;
     margin-top: 0;
-}
-
-.centered-form form .form-group select,
-.centered-form form .form-group input[type="number"] {
-    width: 50%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f7f6fb;
-    font-size: 16px;
-    box-sizing: border-box;
 }
 
 .centered-form .message-box {
@@ -216,23 +203,10 @@ a:hover {
     gap: 10px;
 }
 
-#headerlinks li {
-    display: inline;
-}
-
 #headerlinks a {
     color: #5b34ac;
+    text-decoration: none;
     font-size: 16px;
-    position: relative;
-}
-
-#headerlinks a::after {
-    margin-left: 15px;
-    color: #5b34ac;
-}
-
-#headerlinks a:last-child::after {
-    content: '';
 }
 
 #headerlinks a:hover {
@@ -293,10 +267,6 @@ footer {
     gap: 15px;
 }
 
-#primarynav li {
-    display: inline-block;
-}
-
 #primarynav a {
     text-decoration: none;
     color: #ffffff;
@@ -307,17 +277,6 @@ footer {
 
 #primarynav a:hover {
     background-color: #7a4dd1;
-}
-
-/* Form */
-.centered-form {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    text-align: center;
 }
 
 /* Main*/
@@ -509,6 +468,8 @@ input[type="date"]:focus {
     background-color: #7a4dd1;
 }
 
+/* Reservations table */
+
 .reservations-table {
     flex: 1.5;
     max-width: 65%;
@@ -535,15 +496,17 @@ input[type="date"]:focus {
     text-align: center;
 }
 
-.reservations-table th, .reservations-table td {
+.reservations-table th,
+.reservations-table td {
     padding: 12px;
     border-bottom: 1px solid #ddd;
+    text-align: center;
 }
+
 
 .reservations-table th {
     background-color: #e8e2f1;
     color: #5b34ac;
-    font-weight: bold;
 }
 
 .reservations-table td {
@@ -578,35 +541,97 @@ input[type="date"]:focus {
     background-color: #900;
 }
 
+/* Explore Destinations - Grid Layout */
+.explore-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.destination-card {
+    flex: 0 0 calc(33.333% - 20px);
+    box-sizing: border-box;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+}
+
+.destination-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.destination-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.destination-card h2 {
+    font-size: 22px;
+    color: #5b34ac;
+    margin: 10px 0;
+}
+
+.destination-card p {
+    font-size: 16px;
+    color: #333;
+}
+
+.destination-card form {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.destination-card form input[type="date"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f7f6fb;
+    font-size: 16px;
+    text-align: center;
+}
+
+.destination-card button {
+    background-color: #5b34ac;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.destination-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.destination-card button:hover {
+    background-color: #7a4dd1;
+}
 
 /* Mobile Responsiveness */
 @media screen and (max-width: 768px) {
+    .account-page {
+        flex-direction: column;
+    }
+
     .centered-form {
         max-width: 90%;
         padding: 15px;
     }
 
-    nav a {
-        font-size: 15px;
-    }
-
     header h1 {
         font-size: 28px;
-    }
-
-    footer {
-        padding: 10px 0;
-    }
-
-    .filter-buttons {
-        flex-direction: row;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .filter-option,
-    .filter-price {
-        padding: 10px 15px;
-        font-size: 14px;
     }
 }

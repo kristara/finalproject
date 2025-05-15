@@ -51,34 +51,35 @@ $conn->close();
         <?php include 'primarynav.php'; ?>
 
         <main>
-            <h1>All Destinations</h1>
-            <?php if ($results->num_rows === 0): ?>
-                <p>No destinations are currently available.</p>
-            <?php else: ?>
-                <ul class="destination-list">
+            <h1>Explore Destinations</h1>
+            <section class="explore-section">
+                <?php if ($results->num_rows === 0): ?>
+                    <p>No destinations are currently available.</p>
+                <?php else: ?>
                     <?php while ($row = $results->fetch_assoc()): ?>
-                        <li>
+                        <div class="destination-card">
+                            <!-- Placeholder image, replace with actual images later -->
+                            <img src="images/paris.webp" alt="Paris">
                             <h2>
                                 <?= htmlspecialchars($row['name']) ?>
                                 (<?= htmlspecialchars($row['country']) ?>)
                             </h2>
                             <p>
-                                From £<?= number_format($row['economy_price'], 2) ?>
-                                &mdash; <?= intval($row['total_economy_seats']) ?> seats available
+                                From £<?= number_format($row['economy_price'], 2) ?><br>
+                                <?= intval($row['total_economy_seats']) ?> seats available
                             </p>
 
                             <!-- Add a date picker for dynamic departure date -->
                             <form action="book.php" method="GET">
+                                <input type="hidden" name="destination_id" value="<?= $row['destination_id'] ?>">
                                 <label for="departure_date_<?= $row['destination_id'] ?>">Select Departure Date:</label>
                                 <input type="date" name="departure_date" id="departure_date_<?= $row['destination_id'] ?>" required>
-                                <input type="hidden" name="destination_id" value="<?= $row['destination_id'] ?>">
-
                                 <button type="submit">Book Now</button>
                             </form>
-                        </li>
+                        </div>
                     <?php endwhile; ?>
-                </ul>
-            <?php endif; ?>
+                <?php endif; ?>
+            </section>
         </main>
 
         <!-- shared footer -->

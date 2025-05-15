@@ -105,52 +105,49 @@ if ($flightStmt->execute()) {
 
                 <!-- Flight Selection Form -->
                 <form action="confirm_booking.php" method="POST">
-                    <label>From:</label>
-                    <input
-                        type="text"
-                        name="origin"
-                        value="London Heathrow (LHR)"
-                        readonly
-                    ><br><br>
+                    <div class="form-group">
+                        <label>From:</label>
+                        <input type="text" name="origin" value="London Heathrow (LHR)" readonly>
+                    </div>
 
                     <!-- destination selector -->
-                    <label>To:</label>
-                    <select name="destination_id" required>
-                        <option value="">Select destination</option>
-                        <?php while ($row = $allDestStmt->fetch_assoc()): ?>
-                            <option
-                                value="<?= $row['destination_id'] ?>"
-                                <?= (int)$row['destination_id'] === (int)$destination_id ? 'selected' : '' ?>
-                            >
-                                <?= htmlspecialchars($row['name']) ?>,
-                                <?= htmlspecialchars($row['country']) ?>
-                            </option>
-                        <?php endwhile; ?>
-                    </select><br><br>
+                    <div class="form-group">
+                        <label>To:</label>
+                        <select name="destination_id" required>
+                            <option value="">Select destination</option>
+                            <?php while ($row = $allDestStmt->fetch_assoc()): ?>
+                                <option value="<?= $row['destination_id'] ?>" <?= (int)$row['destination_id'] === (int)$destination_id ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($row['name']) ?>, <?= htmlspecialchars($row['country']) ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
 
                     <!-- departure date input (dynamically populated) -->
-                    <label>Departure Date:</label>
-                    <input type="text" id="departure_date" name="departure_date" value="<?= htmlspecialchars($departure_date) ?>" required><br><br>
+                    <div class="form-group">
+                        <label>Departure Date:</label>
+                        <input type="text" id="departure_date" name="departure_date" value="<?= htmlspecialchars($departure_date) ?>" required>
+                    </div>
 
                     <!-- number of passengers -->
-                    <label>Number of Passengers:</label>
-                    <input
-                        type="number"
-                        name="number_of_passengers"
-                        min="1"
-                        value="1"
-                        required
-                    ><br><br>
+                    <div class="form-group">
+                        <label>Number of Passengers:</label>
+                        <input type="number" name="number_of_passengers" min="1" value="1" required>
+                    </div>
 
                     <!-- seat class -->
-                    <label>Seat Class:</label>
-                    <select name="seat_class" required>
-                        <option value="economy">Economy</option>
-                        <option value="business">Business</option>
-                        <option value="first">First</option>
-                    </select><br><br>
+                    <div class="form-group">
+                        <label>Seat Class:</label>
+                        <select name="seat_class" required>
+                            <option value="economy">Economy</option>
+                            <option value="business">Business</option>
+                            <option value="first">First</option>
+                        </select>
+                    </div>
 
-                    <button type="submit">Proceed</button>
+                    <div class="form-group">
+                        <button type="submit">Proceed</button>
+                    </div>
                 </form>
 
                 <!-- display available flights based on destination and date -->
