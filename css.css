@@ -712,6 +712,34 @@ input[type="date"]:focus {
     background-color: #7a4dd1;
 }
 
+/* Terms */
+.terms-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f7f6fb;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.terms-content h1 {
+    font-size: 32px;
+    color: #5b34ac;
+    margin-bottom: 15px;
+}
+
+.terms-content h2 {
+    font-size: 24px;
+    color: #5b34ac;
+    margin-top: 20px;
+}
+
+.terms-content p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+}
+
 /* Mobile Responsiveness */
 @media screen and (max-width: 768px) {
     .account-page {
