@@ -8,12 +8,10 @@ $sql = "
         d.destination_id,
         d.name,
         d.country,
-        MIN(fs.price_per_seat) AS economy_price,
-        SUM(fs.available_seats) AS total_economy_seats
+        MIN(fs.price_per_seat) AS economy_price
     FROM destinations d
     JOIN flights f ON f.destination_id = d.destination_id
-    JOIN flight_seats fs ON fs.flight_id = f.flight_id
-        AND fs.seat_class = 'economy'
+    JOIN flight_seats fs ON fs.flight_id = f.flight_id AND fs.seat_class = 'economy'
     GROUP BY d.destination_id, d.name, d.country
     ORDER BY d.name ASC
 ";
@@ -28,8 +26,8 @@ $conn->close();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
     <title>Explore Destinations</title>
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="css.css">
 </head>
 
@@ -53,50 +51,34 @@ $conn->close();
         <main>
             <h1>Explore Destinations</h1>
             <div class="destination-list">
-                <?php
-                $destinations = [
-                    ['Bali', 'Indonesia'], ['Paris', 'France'], ['Swiss Alps', 'Switzerland'],
-                    ['Dubai', 'UAE'], ['Maldives', 'Maldives'], ['Tokyo', 'Japan'],
-                    ['New York', 'USA'], ['Zakynthos', 'Greece'], ['Banff', 'Canada'],
-                    ['Machu Picchu', 'Peru'], ['Barcelona', 'Spain'], ['Hawaii', 'USA'],
-                    ['Prague', 'Czech Republic'], ['Rome', 'Italy'], ['Sydney', 'Australia'],
-                    ['Cape Town', 'South Africa'], ['Rio de Janeiro', 'Brazil'], ['Lapland', 'Finland'],
-                    ['Vienna', 'Austria'], ['Tromso', 'Norway'], ['Amsterdam', 'Netherlands'],
-                    ['Cairo', 'Egypt'], ['Los Angeles', 'USA'], ['Seoul', 'South Korea'],
-                    ['Phuket', 'Thailand'], ['Lisbon', 'Portugal'], ['Venice', 'Italy'],
-                    ['Edinburgh', 'Scotland'], ['Bora Bora', 'French Polynesia'], ['Bangkok', 'Thailand'],
-                    ['Kathmandu', 'Nepal'], ['Hong Kong', 'China'], ['Mykonos', 'Greece'],
-                    ['Santorini', 'Greece'], ['Reykjavik', 'Iceland'], ['Nairobi', 'Kenya'],
-                    ['Buenos Aires', 'Argentina'], ['Marrakech', 'Morocco'], ['Auckland', 'New Zealand'],
-                    ['Doha', 'Qatar'], ['Abu Dhabi', 'UAE'], ['Athens', 'Greece'],
-                    ['Zermatt', 'Switzerland'], ['Ho Chi Minh City', 'Vietnam'], ['Havana', 'Cuba'],
-                    ['Delhi', 'India'], ['Stockholm', 'Sweden'], ['Montreal', 'Canada'],
-                    ['Oslo', 'Norway'], ['Fiji', 'Fiji']
-                ];
-                foreach ($destinations as $index => $destination) {
-                    $name = $destination[0];
-                    $country = $destination[1];
-                    
-                    // generate image filename for both .jpg and .jpeg
-                    $imageBaseName = strtolower(str_replace(' ', '_', $name)) . "_" . strtolower(str_replace(' ', '_', $country));
-                    $imagePathJpg = "images/{$imageBaseName}.jpg";
-                    $imagePathJpeg = "images/{$imageBaseName}.jpeg";
+                <?php while ($row = $results->fetch_assoc()): ?>
+                    <?php
+                        // generate image filename for both .jpg and .jpeg
+                        $imageBaseName = strtolower(str_replace(' ', '_', $row['name'])) . "_" . strtolower(str_replace(' ', '_', $row['country']));
+                        $imagePathJpg = "images/{$imageBaseName}.jpg";
+                        $imagePathJpeg = "images/{$imageBaseName}.jpeg";
 
-                    // check if the image exists as .jpg or .jpeg
-                    $imageSrc = file_exists($imagePathJpg) ? $imagePathJpg : (file_exists($imagePathJpeg) ? $imagePathJpeg : "images/default.jpg");
-                ?>
-                <div class="destination-card">
-                    <img src="<?= $imageSrc ?>" alt="<?= $name ?>, <?= $country ?>">
-                    <h2><?= $name ?>, <?= $country ?></h2>
-                    <p>From £200 — 50 seats available</p>
-                    <form action="book.php" method="GET">
-                        <label>Select Departure Date:</label>
-                        <input type="date" name="departure_date" required>
-                        <input type="hidden" name="destination_id" value="<?= $index + 1 ?>">
-                        <button type="submit">Book Now</button>
-                    </form>
-                </div>
-                <?php } ?>
+                        //check if the image exists as .jpg or .jpeg
+                        if (file_exists($imagePathJpg)) {
+                            $imageSrc = $imagePathJpg;
+                        } elseif (file_exists($imagePathJpeg)) {
+                            $imageSrc = $imagePathJpeg;
+                        } else {
+                            $imageSrc = "images/default.jpg";
+                        }
+                    ?>
+                    <div class="destination-card">
+                        <img src="<?= $imageSrc ?>" alt="<?= htmlspecialchars($row['name']) ?>, <?= htmlspecialchars($row['country']) ?>" width="300" height="200">
+                        <h2><?= htmlspecialchars($row['name']) ?>, <?= htmlspecialchars($row['country']) ?></h2>
+                        <p>From £<?= number_format($row['economy_price'], 2) ?></p>
+                        <form action="book.php" method="GET">
+                            <input type="hidden" name="destination_id" value="<?= $row['destination_id'] ?>">
+                            <label>Select Departure Date:</label>
+                            <input type="date" name="departure_date" required>
+                            <button type="submit">Book Now</button>
+                        </form>
+                    </div>
+                <?php endwhile; ?>
             </div>
         </main>
 

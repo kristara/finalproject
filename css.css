@@ -59,7 +59,7 @@ header::after {
 
 /* Forms for register/Login/Modify/Manage.. */
 .centered-form {
-    max-width: 500px;
+    max-width: 600px;
     margin: 10px auto;
     padding: 20px 30px;
     background-color: #ffffff;
@@ -661,6 +661,55 @@ input[type="date"]:focus {
 
 .destination-card button:hover {
     ackground-color: #7a4dd1;
+}
+
+/* Available flights */
+.available-flights {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+    background-color: #f7f6fb;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+.available-flights li {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    text-align: center;
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+.available-flights form {
+    margin: 0;
+    display: flex;
+    justify-content: flex-end;
+    width: fit-content;
+}
+
+.available-flights button {
+    background-color: #5b34ac;
+    color: #fff;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.available-flights button:hover {
+    background-color: #7a4dd1;
 }
 
 /* Mobile Responsiveness */

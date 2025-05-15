@@ -45,17 +45,17 @@ session_start(); // start the session
                         <button type="button" class="filter-option" data-value="romantic">❤️ Romantic</button>
                     </div>
 
-					<!--  filters for price -->
+					<!--  filters for price filtering script -->
 					<h2>Price Range</h2>
                     <div class="filter-buttons">
-                        <button type="button" class="filter-price" data-value="under_500">Under £500</button>
-                        <button type="button" class="filter-price" data-value="500_1000">£500 - £1,000</button>
-                        <button type="button" class="filter-price" data-value="1000_2000">£1,000 - £2,000</button>
-                        <button type="button" class="filter-price" data-value="2000_3000">£2,000 - £3,000</button>
+                        <button type="button" class="filter-price" data-value="0-500">Under £500</button>
+                        <button type="button" class="filter-price" data-value="500-1000">£500 - £1,000</button>
+                        <button type="button" class="filter-price" data-value="1000-2000">£1,000 - £2,000</button>
+                        <button type="button" class="filter-price" data-value="2000-3000">£2,000 - £3,000</button>
                     </div>
 
 					<input type="hidden" name="keywords" id="selected-keywords">
-                    <input type="hidden" name="price_range" id="selected-price-range">
+                    <input type="hidden" name="price_ranges" id="selected-price-range">
                 </div>
 				<!-- submit button to trigger PHP filter script -->
 				<button type="submit" class="find-btn">Find Destinations</button>
@@ -66,7 +66,6 @@ session_start(); // start the session
 		<?php include 'footerlinks.php'; ?>
 
 		<!-- javaScript for Toggle Effect -->
-				
 		<script>
 			document.addEventListener("DOMContentLoaded", function() {
 				//selection for destination features
@@ -79,19 +78,18 @@ session_start(); // start the session
 
 				// selection for price range
 				document.querySelectorAll(".filter-price").forEach(button => {
-                	button.addEventListener("click", function() {
-						document.querySelectorAll(".filter-price").forEach(btn => btn.classList.remove("active"));
-						this.classList.add("active");
+					button.addEventListener("click", function() {
+						this.classList.toggle("active");
 						updateSelectedPrice();
-                	});
-            	});
+					});
+				});
 
 				// update selected keywords
-				function updateSelectedKeywords() {
-               	 	const selectedKeywords = Array.from(document.querySelectorAll(".filter-option.active"))
-                    	.map(button => button.getAttribute("data-value"));
-                	document.getElementById("selected-keywords").value = selectedKeywords.join(",");
-            	}
+				function updateSelectedPrice() {
+					const selectedPrices = Array.from(document.querySelectorAll(".filter-price.active"))
+						.map(button => button.getAttribute("data-value"));
+					document.getElementById("selected-price-range").value = selectedPrices.join(",");
+				}
 
 				//update selected price
 				function updateSelectedPrice() {
@@ -106,9 +104,9 @@ session_start(); // start the session
 
 					// prevent submission if no filters are selected
 					const keywords = document.getElementById("selected-keywords").value;
-					const price = document.getElementById("selected-price-range").value;
+					const prices = document.getElementById("selected-price-range").value;
 
-					if (!keywords && !price) {
+					if (!keywords && !prices) {
 						alert("Please select at least one filter before searching.");
 						event.preventDefault();
 					}
