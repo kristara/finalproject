@@ -3,75 +3,61 @@ session_start(); // start the session
 require_once 'config.php'; // database connection
 
 //validate incoming form data
-if (
-    empty($_POST['flight_id']) ||
-    empty($_POST['number_of_passengers']) ||
-    empty($_POST['seat_class'])
-) {
-    exit("Missing flight selection.");
+if (!isset($_POST['flight_id'], $_POST['departure_date'], $_POST['seat_class'])) {
+    die("Missing flight selection.");
 }
 
-$flight_id  = (int) $_POST['flight_id'];
-$passengers = max(1, (int) $_POST['number_of_passengers']);
+$flight_id = intval($_POST['flight_id']);
+$departure_date = $_POST['departure_date'];
 $seat_class = $_POST['seat_class'];
+$number_of_passengers = intval($_POST['number_of_passengers'] ?? 1);
 
-//ensure the seat_class matches your enum
-$valid = ['economy','business','first'];
-if (! in_array($seat_class, $valid, true)) {
-    exit("Invalid seat class.");
-}
-
-//fetch price and availability from flight_seats
-$stmt = $conn->prepare("
-        SELECT
-            fs.price_per_seat,
-            fs.available_seats,
-            d.name   AS destination_name,
-            d.country AS destination_country,
-            f.departure_date
-        FROM flight_seats fs
-        JOIN flights f ON fs.flight_id = f.flight_id
-        JOIN destinations d ON f.destination_id = d.destination_id
-        WHERE fs.flight_id = ? AND fs.seat_class = ?
-");
+// fetch destination details
+$stmt = $conn->prepare("SELECT f.origin, d.name AS destination, d.country, fs.price_per_seat, fs.available_seats FROM flights f JOIN destinations d ON f.destination_id = d.destination_id JOIN flight_seats fs ON fs.flight_id = f.flight_id WHERE f.flight_id = ? AND fs.seat_class = ?");
 $stmt->bind_param('is', $flight_id, $seat_class);
 $stmt->execute();
 $flight = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-if (! $flight) {
-    exit("Flight or class not found.");
+// set destination details
+$destination_name = $destination['name'] ?? 'Unknown Destination';
+$destination_country = $destination['country'] ?? 'Unknown Country';
+
+//fetch price and availability from flight_seats
+$stmt = $conn->prepare("SELECT fs.available_seats, fs.price_per_seat, f.departure_date FROM flight_seats fs JOIN flights f ON fs.flight_id = f.flight_id WHERE fs.flight_id = ? AND fs.seat_class = ?");
+$stmt->bind_param('is', $flight_id, $seat_class);
+$stmt->execute();
+$flight = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+//check if the flight is found
+if (!$flight) {
+    die('Flight not found.');
 }
-if ($flight['available_seats'] < $passengers) {
-    exit("Only {$flight['available_seats']} seats left in {$seat_class} class.");
+
+//ensure available seats exist
+$available_seats = (int)($flight['available_seats'] ?? 0);
+
+if ($available_seats < $number_of_passengers) {
+    die("Only $available_seats seats left in $seat_class class.");
 }
 
 //calculate total
-$total      = $flight['price_per_seat'] * $passengers;
+$total_price = $flight['price_per_seat'] * $number_of_passengers;
+
+// checking if user is logged in
 $isLoggedIn = isset($_SESSION['user_id']);
 
 // if a guest user then store pending in session
-if (! $isLoggedIn) {
+if (!$isLoggedIn) {
     $_SESSION['pending_booking'] = [
         'flight_id'  => $flight_id,
-        'passengers' => $passengers,
+        'departure_date' => $departure_date,
         'seat_class' => $seat_class,
+        'number_of_passengers' => $number_of_passengers,
+        'total_price' => $total_price
     ];
 }
-
-// fetch available flights for the destination and date
-$dateRangeStart = date('Y-m-d', strtotime($departure_date . ' -3 days')); // 3 days before the selected date
-$dateRangeEnd = date('Y-m-d', strtotime($departure_date . ' +3 days'));   // 3 days after the selected date
-
-$flightStmt = $conn->prepare("
-    SELECT * FROM flights
-    WHERE destination_id = ?
-    AND departure_date BETWEEN ? AND ?
-");
-$flightStmt->bind_param('iss', $flight['destination_id'], $dateRangeStart, $dateRangeEnd);
-$flightStmt->execute();
-$flights = $flightStmt->get_result();
-$flightStmt->close();
 
 ?>
 
@@ -101,37 +87,32 @@ $flightStmt->close();
         <?php include 'primarynav.php'; ?>
 
         <main>
-            <h1>Confirm Your Booking</h1>
-            <p><strong>Destination:</strong>
-                <?= htmlspecialchars($flight['destination_name']) ?>,
-                <?= htmlspecialchars($flight['destination_country']) ?>
-            </p>
-            <p><strong>Departure Date:</strong>
-                <?= htmlspecialchars($flight['departure_date']) ?>
-            </p>
-            <p><strong>Class:</strong>
-                <?= htmlspecialchars(ucfirst($seat_class)) ?>
-            </p>
-            <p><strong>Passengers:</strong> <?= $passengers ?></p>
-            <p><strong>Price per Seat:</strong>
-                £<?= number_format($flight['price_per_seat'],2) ?>
-            </p>
-            <p><strong>Total Price:</strong>
-                £<?= number_format($total,2) ?>
-            </p>
-
-            <?php if ($isLoggedIn): ?>
-                <form action="finalise_booking.php" method="POST">
-                    <input type="hidden" name="confirm" value="1">
-                    <button type="submit">Confirm Booking</button>
-                </form>
-            <?php else: ?>
-                <p>
-                    Please <a href="login.php">log in</a> or
-                    <a href="registration.php">register</a>
-                    to complete your booking.
-                </p>
-            <?php endif; ?>
+            <section class="centered-form">
+                <h1>Confirm Booking</h1>
+                <p><strong>Origin:</strong> <?= htmlspecialchars($flight['origin'] ?? 'Unknown') ?></p>
+                <p><strong>Destination:</strong> <?= htmlspecialchars($flight['destination'] ?? 'Unknown') ?>, <?= htmlspecialchars($flight['country'] ?? 'Unknown') ?></p>
+                <p><strong>Departure Date:</strong> <?= htmlspecialchars($departure_date) ?></p>
+                <p><strong>Class:</strong> <?= ucfirst(htmlspecialchars($seat_class)) ?></p>
+                <p><strong>Number of Passengers:</strong> <?= htmlspecialchars($number_of_passengers) ?></p>
+                <p><strong>Total Price:</strong> £<?= number_format($total_price, 2) ?></p>
+                
+                <?php if ($isLoggedIn): ?>
+                    <form action="finalise_booking.php" method="POST">
+                        <input type="hidden" name="flight_id" value="<?= $flight_id ?>">
+                        <input type="hidden" name="departure_date" value="<?= $departure_date ?>">
+                        <input type="hidden" name="seat_class" value="<?= $seat_class ?>">
+                        <input type="hidden" name="number_of_passengers" value="<?= $number_of_passengers ?>">
+                        <input type="hidden" name="total_price" value="<?= $total_price ?>">
+                        <button type="submit">Confirm Booking</button>
+                    </form>
+                <?php else: ?>
+                    <p>
+                        Please <a href="login.php">log in</a> or
+                        <a href="registration.php">register</a>
+                        to complete your booking.
+                    </p>
+                <?php endif; ?>
+            </section>
         </main>
 
         <?php include 'footerlinks.php'; ?>

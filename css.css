@@ -672,37 +672,35 @@ input[type="date"]:focus {
     padding: 15px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .available-flights li {
-    padding: 10px 15px;
-    margin-bottom: 10px;
+    padding: 15px 20px;
+    margin-bottom: 12px;
     background-color: #ffffff;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 12px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    gap: 40px;
+    gap: 10px;
     text-align: center;
-    max-width: 450px;
+    max-width: 500px;
     margin: 0 auto;
 }
 
-.available-flights form {
-    margin: 0;
-    display: flex;
-    justify-content: flex-end;
-    width: fit-content;
+.available-flights li div {
+    font-size: 18px;
+    color: #333;
 }
 
 .available-flights button {
     background-color: #5b34ac;
     color: #fff;
-    padding: 8px 20px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 18px;
+    border-radius: 12px;
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s;
@@ -710,6 +708,17 @@ input[type="date"]:focus {
 
 .available-flights button:hover {
     background-color: #7a4dd1;
+}
+
+.available-flights li:hover {
+    background-color: #f0eff8;
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.available-flights li .flight-class {
+    font-weight: bold;
+    color: #5b34ac;
 }
 
 /* Terms */

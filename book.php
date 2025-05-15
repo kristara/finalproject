@@ -30,7 +30,7 @@ if ($destination_id > 0) {
 }
 
 // calculate return date
-if ($departure_date) {
+if (!empty($departure_date)) {
     $return_date = date('Y-m-d', strtotime($departure_date . ' +7 days'));
 }
 
@@ -38,19 +38,16 @@ if ($departure_date) {
 $allDestStmt = $conn->query("SELECT destination_id, name, country FROM destinations ORDER BY name ASC");
 
 // fetch available flights for the destination
-$flightStmt = $conn->prepare("
-    SELECT *
-    FROM flights
-    WHERE destination_id = ?
-    AND departure_date >= ?
-    ORDER BY departure_date ASC
-");
-$flightStmt->bind_param('is', $destination_id, $departure_date);
-$flightStmt->execute();
-$flights_result = $flightStmt->get_result();
-$flightStmt->close();
-
+$flights_result = [];
+if ($destination_id > 0 && !empty($departure_date)) {
+    $stmt = $conn->prepare("SELECT f.flight_id, f.departure_date, fs.price_per_seat AS price, fs.seat_class FROM flights f JOIN flight_seats fs ON fs.flight_id = f.flight_id WHERE f.destination_id = ? AND f.departure_date >= ? ORDER BY f.departure_date ASC");
+    $stmt->bind_param('is', $destination_id, $departure_date);
+    $stmt->execute();
+    $flights_result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+}
 $conn->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -61,8 +58,33 @@ $conn->close();
     <link rel="stylesheet" href="css.css">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('departure_date').addEventListener('change', function() {
-                this.form.submit();
+            const departureInput = document.getElementById('departure_date');
+            const returnDateInput = document.getElementById('return_date');
+            const flightsList = document.getElementById('available-flights');
+            const seatClassSelect = document.querySelector('select[name="seat_class"]');
+
+            // filter flights by seat class
+            seatClassSelect.addEventListener('change', function() {
+                const selectedClass = this.value;
+                document.querySelectorAll('.available-flight').forEach(function(flight) {
+                    const flightClass = flight.dataset.class;
+                    flight.style.display = (selectedClass === '' || flightClass === selectedClass) ? 'block' : 'none';
+                });
+            });
+
+            // filter flights by date
+            departureInput.addEventListener('change', function() {
+                const departureDate = new Date(departureInput.value);
+                if (departureDate) {
+                    const returnDate = new Date(departureDate);
+                    returnDate.setDate(returnDate.getDate() + 7);
+                    returnDateInput.value = returnDate.toISOString().split('T')[0];
+
+                    document.querySelectorAll('.available-flight').forEach(function(flight) {
+                        const flightDate = new Date(flight.dataset.departure);
+                        flight.style.display = (flightDate >= departureDate) ? 'block' : 'none';
+                    });
+                }
             });
         });
     </script>
@@ -89,8 +111,10 @@ $conn->close();
             <section class="centered-form">
                 <h1>Book a Flight</h1>
 
-                <!-- flightorm -->
-                <form action="book.php" method="GET">
+                <form action="confirm_booking.php" method="POST">
+                    <input type="hidden" name="flight_id" value="<?= $selected_flight_id ?? '' ?>">
+                    <input type="hidden" name="departure_date" value="<?= htmlspecialchars($departure_date) ?>">
+
                     <div class="form-group">
                         <label>From:</label>
                         <input type="text" name="origin" value="London Heathrow (LHR)" readonly>
@@ -99,29 +123,24 @@ $conn->close();
                     <!-- destination selector -->
                     <div class="form-group">
                         <label>To:</label>
-                        <select name="destination_id" required onchange="this.form.submit()">
-                            <option value="">Select destination</option>
-                            <?php while ($row = $allDestStmt->fetch_assoc()): ?>
-                                <option value="<?= $row['destination_id'] ?>" <?= (int)$row['destination_id'] === $destination_id ? 'selected' : '' ?>><?= htmlspecialchars($row['name']) ?>, <?= htmlspecialchars($row['country']) ?></option>
-                            <?php endwhile; ?>
-                        </select>
+                        <input type="text" value="<?= htmlspecialchars($destination_name) ?>, <?= htmlspecialchars($destination_country) ?>" readonly>
+                        <input type="hidden" name="destination_id" value="<?= $destination_id ?>">
                     </div>
 
-                    <!-- departure date input -->
                     <div class="form-group">
                         <label>Departure Date:</label>
-                        <input type="date" name="departure_date" value="<?= htmlspecialchars($departure_date) ?>" required onchange="this.form.submit()">
+                        <input type="date" id="departure_date" name="departure_date" value="<?= htmlspecialchars($departure_date) ?>" min="<?= date('Y-m-d') ?>" required>
                     </div>
 
                     <div class="form-group">
-                        <label>Return Date (7 Days Later):</label>
-                        <input type="text" value="<?= htmlspecialchars($return_date) ?>" readonly>
+                        <label>Return Date:</label>
+                        <input type="text" id="return_date" value="<?= htmlspecialchars($return_date) ?>" readonly>
                     </div>
 
                     <!-- number of passengers -->
                     <div class="form-group">
                         <label>Number of Passengers:</label>
-                        <input type="number" name="number_of_passengers" min="1" value="1" required>
+                        <input type="number" name="number_of_passengers" id="number_of_passengers" min="1" value="1" required>
                     </div>
 
                     <!-- seat class -->
@@ -133,31 +152,38 @@ $conn->close();
                             <option value="first">First</option>
                         </select>
                     </div>
-                </form>
 
-                <!-- display available flights based on destination and date -->
-                <h2>Earliest flights to <?= htmlspecialchars($destination_name) ?> available from <?= htmlspecialchars($departure_date) ?>:</h2>
-                <?php if ($flights_result && $flights_result->num_rows > 0): ?>
-                    <ul class="available-flights">
-                        <?php while ($flight = $flights_result->fetch_assoc()): ?>
-                            <li>
-                                <div>
-                                    Departure: <?= $flight['departure_date'] ?>
-                                </div>
-                                <form action="confirm_booking.php" method="POST">
-                                    <input type="hidden" name="flight_id" value="<?= $flight['flight_id'] ?>" />
-                                    <input type="hidden" name="departure_date" value="<?= $flight['departure_date'] ?>" />
-                                    <button type="submit">Proceed</button>
-                                </form>
-                            </li>
-                        <?php endwhile; ?>
+                    <!-- display available flights based on destination and date -->
+                    <h2>Available Flights:</h2>
+                    <ul id="available-flights" class="available-flights">
+                        <?php if (!empty($flights_result)): ?>
+                            <?php foreach ($flights_result as $flight): ?>
+                                <li class="available-flight" data-departure="<?= $flight['departure_date'] ?>" data-class="<?= $flight['seat_class'] ?>">
+                                    <div>
+                                        Departure: <?= $flight['departure_date'] ?>,
+                                        Class: <?= ucfirst($flight['seat_class']) ?>,
+                                        Price: £<?= number_format($flight['price'], 2) ?>
+                                    </div>
+                                    <form action="confirm_booking.php" method="POST">
+                                        <input type="hidden" name="flight_id" value="<?= $flight['flight_id'] ?>" />
+                                        <input type="hidden" name="departure_date" value="<?= $flight['departure_date'] ?>" />
+                                        <input type="hidden" name="seat_class" value="<?= $flight['seat_class'] ?>" />
+                                        <input type="hidden" name="number_of_passengers" value="1">
+                                        <button type="submit">Proceed</button>
+                                    </form>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p>No available flights for the selected destination and date.</p>
+                        <?php endif; ?>
                     </ul>
-                <?php endif; ?>
+                </form>
             </section>
         </main>
 
         <!-- shared footer -->
         <?php include 'footerlinks.php'; ?>
+
     </div>
 </body>
 </html>
