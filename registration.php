@@ -94,11 +94,6 @@ $conn->close();
     <title>Register</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css.css">
-    <style>
-        .message-box { margin-block-start: 15px; }
-        .success-message { color: green; font-weight: bold; }
-        .error-message { color: red; font-weight: bold; }
-    </style>
 </head>
 
 <body>
@@ -119,45 +114,57 @@ $conn->close();
         <?php include 'primarynav.php'; ?>
 
         <main>
-            <section>
+            <section class="centered-form">
                 <h1>Register</h1>
                 <form action="registration.php" method="POST">
-                    <label>First Name:</label>
-                    <input type="text" name="first_name" required><br><br>
-
-                    <label>Middle Name (optional):</label>
-                    <input type="text" name="middle_name"><br><br>
-
-                    <label>Last Name:</label>
-                    <input type="text" name="last_name" required><br><br>
-
-                    <label>Email:</label>
-                    <input type="email" name="email" required><br><br>
-
-                    <label>Password:</label>
-                    <input type="password" name="password" required><br><br>
-
-                    <label>Phone Number (optional):</label>
-                    <input type="text" name="phone_number"><br><br>
-
-                    <label>City:</label>
-                    <input type="text" name="city" required><br><br>
-
-                    <label>Post Code:</label>
-                    <input type="text" name="post_code" required><br><br>
-
-                    <label>Country:</label>
-                    <input type="text" name="country" required><br><br>
-
-                    <label>Date of Birth:</label>
-                    <input type="date" name="dob" required><br><br>
-
-                    <label>Address (optional):</label>
-                    <input type="text" name="address"><br><br>
-
-                    <button type="submit">Register</button>
+                    <div class="form-group">
+                        <label>First Name:</label>
+                        <input type="text" name="first_name" required><br><br>
+                    </div>
+                    <div class="form-group">
+                        <label>Middle Name (optional):</label>
+                        <input type="text" name="middle_name"><br><br>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name:</label>
+                        <input type="text" name="last_name" required><br><br>
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" name="email" required><br><br>
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" name="password" required><br><br>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number (optional):</label>
+                        <input type="text" name="phone_number"><br><br>
+                    </div>
+                    <div class="form-group">
+                        <label>City:</label>
+                        <input type="text" name="city" required><br><br>
+                    </div>
+                    <div class="form-group">
+                        <label>Post Code:</label>
+                        <input type="text" name="post_code" required><br><br>
+                    </div>
+                    <div class="form-group">
+                        <label>Country:</label>
+                        <input type="text" name="country" required><br><br>
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth:</label>
+                        <input type="date" name="dob" required><br><br>
+                    </div>
+                    <div class="form-group">
+                        <label>Address (optional):</label>
+                        <input type="text" name="address"><br><br>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Register</button>
+                    </div>
                 </form>
-
                 <div class="message-box">
                     <?= $message ?>
                 </div>

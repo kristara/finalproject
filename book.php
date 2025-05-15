@@ -100,7 +100,7 @@ if ($flightStmt->execute()) {
         <?php include 'primarynav.php'; ?>
 
         <main>
-            <section>
+            <section class="centered-form">
                 <h1>Book a Flight</h1>
 
                 <!-- Flight Selection Form -->

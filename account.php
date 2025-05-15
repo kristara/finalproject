@@ -12,8 +12,8 @@ $user_id = $_SESSION['user_id']; // fetch user id
 
 // fetch users account info
 $stmt = $conn->prepare("
-    SELECT first_name, last_name, email, phone_number, city, country
-        FROM users
+    SELECT first_name, last_name, email, phone_number, city, country, dob, address
+    FROM users
     WHERE user_id = ?
 ");
 $stmt->bind_param('i', $user_id);
@@ -26,17 +26,15 @@ $resStmt = $conn->prepare("
     SELECT
         r.reservation_id,
         f.origin,
-        d.name          AS destination,
+        d.name AS destination,
         f.departure_date,
         r.seat_class,
         r.number_of_passengers,
         r.status,
         r.total_price
     FROM reservations r
-    JOIN flights f       ON r.flight_id      = f.flight_id
-    JOIN destinations d  ON f.destination_id = d.destination_id
-    JOIN flight_seats fs ON fs.flight_id      = f.flight_id
-                        AND fs.seat_class    = r.seat_class
+    JOIN flights f ON r.flight_id = f.flight_id
+    JOIN destinations d ON f.destination_id = d.destination_id
     WHERE r.user_id = ?
     ORDER BY f.departure_date ASC
 ");
@@ -54,40 +52,6 @@ $conn->close();
 	<title>My Account</title>
 	<meta charset="UTF-8">
 	<link rel="stylesheet" href="css.css">
-    <style>
-        .btn {
-            display: inline-block;
-            padding: 0.5em 1em;
-            background: #0077cc;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-        .btn:hover { background: #005fa3; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1em;
-        }
-        th, td {
-            padding: 0.5em;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th { background: #f5f5f5; }
-        form.inline { display: inline; }
-        button.cancel {
-            background: transparent;
-            border: none;
-            color: #c00;
-            text-decoration: underline;
-            cursor: pointer;
-            padding: 0;
-            font: inherit;
-        }
-        button.cancel:hover { color: #900; }
-    </style>
 </head>
 
 <body>
@@ -101,16 +65,26 @@ $conn->close();
         <!-- shared header and primary nav -->
         <?php include 'primarynav.php'; ?>
 
-        <main>
-            <section>
-                <h1>Welcome, <?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></h1>
-                <p><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></p>
-                <p><strong>Phone:</strong> <?= htmlspecialchars($user['phone_number'] ?? '—') ?></p>
-                <p><strong>City:</strong> <?= htmlspecialchars($user['city']) ?></p>
-                <p><strong>Country:</strong> <?= htmlspecialchars($user['country']) ?></p>
-            </section>
+        <main class="account-page">
+            <div class="account-info">
+                <h1>Welcome, <?= htmlspecialchars($user['first_name']) ?></h1>
+                <div class="form-group">
+                    <div><strong>First Name:</strong> <?= htmlspecialchars($user['first_name']) ?></div>
+                    <div><strong>Last Name:</strong> <?= htmlspecialchars($user['last_name']) ?></div>
+                    <div><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></div>
+                    <div><strong>Phone:</strong> <?= htmlspecialchars($user['phone_number'] ?: 'Not Provided') ?></div>
+                    <div><strong>City:</strong> <?= htmlspecialchars($user['city']) ?></div>
+                    <div><strong>Country:</strong> <?= htmlspecialchars($user['country']) ?></div>
+                    <div><strong>Date of Birth:</strong> <?= htmlspecialchars($user['dob']) ?></div>
+                    <div><strong>Address:</strong> <?= htmlspecialchars($user['address'] ?: 'Not Provided') ?></div>
+                </div>
 
-            <section>
+                <div class="account-buttons">
+                    <button onclick="confirmDelete()">Delete Account</button>
+                </div>
+            </div>
+
+            <div class="reservations-table">
                 <h2>Your Reservations</h2>
                 <?php if ($reservations->num_rows === 0): ?>
                     <p>You have no reservations.</p>
@@ -142,26 +116,30 @@ $conn->close();
                                 <td><?= ucfirst(htmlspecialchars($res['status'])) ?></td>
                                 <td>£<?= number_format($res['total_price'], 2) ?></td>
                                 <td>
-                                    <a href="modify_booking.php?res_id=<?= urlencode($res['reservation_id']) ?>">Modify</a>
+                                    <a href="modify_booking.php?res_id=<?= urlencode($res['reservation_id']) ?>" class="btn">Modify</a>
                                     |
                                     <form action="cancel_booking.php" method="POST" class="inline">
                                         <input type="hidden" name="reservation_id" value="<?= htmlspecialchars($res['reservation_id']) ?>">
-                                        <button type="submit" class="cancel" onclick="return confirm('Cancel this booking?')">
-                                            Cancel
-                                        </button>
+                                        <button type="submit" class="cancel" onclick="return confirm('Cancel this booking?')">Cancel</button>
                                     </form>
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                            <?php endwhile; ?>
                         </tbody>
                     </table>
                 <?php endif; ?>
-            </section>
+            </div>
         </main>
 
         <!-- shared footer -->
         <?php include 'footerlinks.php'; ?>
-
-	</div>
+        <script>
+            function confirmDelete() {
+                if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+                    window.location.href = 'delete_account.php';
+                }
+            }
+        </script>
+    </div>
 </body>
 </html>

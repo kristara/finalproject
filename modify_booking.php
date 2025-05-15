@@ -182,38 +182,36 @@ $conn->close();
         <?php include 'primarynav.php'; ?>
 
         <main>
-            <h1>Modify Booking</h1>
-            <div class="message-box"><?= $message ?></div>
+            <section class="centered-form">
+                <h1>Modify Booking</h1>
+                <div class="message-box"><?= $message ?></div>
 
-            <?php if (! $redirect): ?>
-            <form method="POST" action="modify_booking.php?res_id=<?= $resId ?>">
-                <input type="hidden" name="reservation_id" value="<?= $resId ?>">
+                <?php if (!$redirect): ?>
+                <form method="POST" action="modify_booking.php?res_id=<?= $resId ?>">
+                    <input type="hidden" name="reservation_id" value="<?= $resId ?>">
+                    
+                    <div class="form-group">
+                        <label for="seat_class">Seat Class:</label>
+                        <select name="seat_class" id="seat_class" required>
+                            <option value="economy" <?= $oldClass === 'economy' ? 'selected' : '' ?>>Economy</option>
+                            <option value="business" <?= $oldClass === 'business' ? 'selected' : '' ?>>Business</option>
+                            <option value="first" <?= $oldClass === 'first' ? 'selected' : '' ?>>First Class</option>
+                        </select>
+                    </div>
 
-                <label>
-                    Seat Class:
-                    <select name="seat_class" required>
-                        <option value="economy"  <?= $oldClass==='economy'  ? 'selected' : '' ?>>Economy</option>
-                        <option value="business" <?= $oldClass==='business' ? 'selected' : '' ?>>Business</option>
-                        <option value="first"    <?= $oldClass==='first'    ? 'selected' : '' ?>>First Class</option>
-                    </select>
-                </label>
-                <br><br>
+                    <div class="form-group">
+                        <label for="passengers">Passengers:</label>
+                        <input type="number" name="passengers" id="passengers" min="1" value="<?= $oldPassengers ?>" required>
+                    </div>
 
-                <label>
-                    Passengers:
-                    <input type="number"
-                            name="passengers"
-                            min="1"
-                            value="<?= $oldPassengers ?>"
-                            required>
-                </label>
-                <br><br>
+                    <div class="form-group">
+                        <button type="submit">Update Booking</button>
+                    </div>
+                </form>
+                <?php endif; ?>
 
-                <button type="submit">Update Booking</button>
-            </form>
-            <?php endif; ?>
-
-            <p><a href="managebooking.php">Return to Manage Booking</a></p>
+                <p><a href="managebooking.php">Return to Manage Booking</a></p>
+            </section>
         </main>
 
         <!-- shared footer -->

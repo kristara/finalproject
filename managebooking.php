@@ -73,57 +73,67 @@ $conn->close();
         <?php include 'primarynav.php'; ?>
 
         <main>
-            <!-- Section for looking up a booking by reservation number and last name -->
-            <h1>Look Up Your Booking</h1>
-            <form method="POST" action="managebooking.php">
-                <label for="reservation_id">Reservation Number:</label><br>
-                <input
-                    type="number"
-                    name="reservation_id"
-                    id="reservation_id"
-                    min="1"
-                    required
-                    value="<?= htmlspecialchars($_POST['reservation_id'] ?? '') ?>"
-                ><br><br>
+            <section class="centered-form">
+                <!-- Section for looking up a booking by reservation number and last name -->
+                <h1>Look Up Your Booking</h1>
+                <form method="POST" action="managebooking.php">
+                    <div class="form-group">
+                        <label for="reservation_id">Reservation Number:</label>
+                        <input
+                            type="number"
+                            name="reservation_id"
+                            id="reservation_id"
+                            min="1"
+                            required
+                            value="<?= htmlspecialchars($_POST['reservation_id'] ?? '') ?>">
+                    </div>
 
-                <label for="last_name">Last Name:</label><br>
-                <input
-                    type="text"
-                    name="last_name"
-                    id="last_name"
-                    required
-                    value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>"
-                ><br><br>
+                    <div class="form-group">
+                        <label for="last_name">Last Name:</label>
+                        <input
+                            type="text"
+                            name="last_name"
+                            id="last_name"
+                            required
+                            value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>">
+                    </div>
 
-                <button type="submit">Look Up Booking</button>
-            </form>
+                    <div class="form-group">
+                        <button type="submit" class="find-btn">Look Up Booking</button>
+                    </div>
+                </form>
 
-            <div class="message-box"><?= $message ?></div>
+                <div class="message-box"><?= $message ?></div>
 
-            <?php if ($booking): ?>
-                <h2>Booking Details</h2>
-                <p><strong>Reservation #:</strong> <?= htmlspecialchars($booking['reservation_id']) ?></p>
-                <p><strong>Destination:</strong> <?= htmlspecialchars($booking['destination']) ?></p>
-                <p><strong>Departure Date:</strong> <?= htmlspecialchars($booking['departure_date']) ?></p>
-                <p><strong>Passengers:</strong> <?= htmlspecialchars($booking['number_of_passengers']) ?></p>
-                <p><strong>Class:</strong> <?= ucfirst(htmlspecialchars($booking['seat_class'])) ?></p>
-                <p><strong>Status:</strong> <?= ucfirst(htmlspecialchars($booking['status'])) ?></p>
+                <?php if ($booking): ?>
+                    <div class="booking-details">
+                        <h2>Booking Details</h2>
+                        <p><strong>Reservation #:</strong> <?= htmlspecialchars($booking['reservation_id']) ?></p>
+                        <p><strong>Destination:</strong> <?= htmlspecialchars($booking['destination']) ?></p>
+                        <p><strong>Departure Date:</strong> <?= htmlspecialchars($booking['departure_date']) ?></p>
+                        <p><strong>Passengers:</strong> <?= htmlspecialchars($booking['number_of_passengers']) ?></p>
+                        <p><strong>Class:</strong> <?= ucfirst(htmlspecialchars($booking['seat_class'])) ?></p>
+                        <p><strong>Status:</strong> <?= ucfirst(htmlspecialchars($booking['status'])) ?></p>
 
-                <?php if ($booking['status'] !== 'cancelled'): ?>
-                    <p>
-                        <a href="modify_booking.php?res_id=<?= urlencode($booking['reservation_id']) ?>">
-                            Modify Booking
-                        </a>
-                        |
-                        <a href="cancel_booking.php?res_id=<?= urlencode($booking['reservation_id']) ?>"
-                            onclick="return confirm('Are you sure you want to cancel this booking?');">
-                            Cancel Booking
-                        </a>
-                    </p>
-                <?php else: ?>
-                    <p><em>This booking has already been cancelled.</em></p>
+                        <?php if ($booking['status'] !== 'cancelled'): ?>
+                            <div class="booking-actions">
+                                <p>
+                                    <a href="modify_booking.php?res_id=<?= urlencode($booking['reservation_id']) ?>">
+                                        Modify Booking
+                                    </a>
+                                    |
+                                    <a href="cancel_booking.php?res_id=<?= urlencode($booking['reservation_id']) ?>"
+                                        onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                        Cancel Booking
+                                    </a>
+                                </div>
+                            </p>
+                        <?php else: ?>
+                            <p><em>This booking has already been cancelled.</em></p>
+                        <?php endif; ?>
+                    </div>
                 <?php endif; ?>
-            <?php endif; ?>
+            </section>
         </main>
 
         <!-- shared footer -->

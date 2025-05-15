@@ -28,11 +28,10 @@ session_start(); // start the session
 		<?php include 'primarynav.php'; ?>
 
 		<main>
-            <h1>Choose Your Destination</h1>
 			<!-- Form that submits selected keywords to the PHP filtering script -->
             <form action="filter_destinations.php" method="POST" id="filter-form">
                 <div class="section-filters">
-                    <h2>Choose destination features:</h2>
+                    <h2>Choose Your Destination</h2>
                     <div class="filter-buttons">
                         <button type="button" class="filter-option" data-value="beach">🏖️ Beach</button>
                         <button type="button" class="filter-option" data-value="city">🏙️ City</button>
@@ -47,7 +46,7 @@ session_start(); // start the session
                     </div>
 
 					<!--  filters for price -->
-					<h3>Price Range</h3>
+					<h2>Price Range</h2>
                     <div class="filter-buttons">
                         <button type="button" class="filter-price" data-value="under_500">Under £500</button>
                         <button type="button" class="filter-price" data-value="500_1000">£500 - £1,000</button>

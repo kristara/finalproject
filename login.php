@@ -73,19 +73,23 @@ $conn->close();
         <?php include 'primarynav.php'; ?>
 
         <main>
-            <h2>Login</h2>
-            <form action="login.php" method="POST">
-                <label>Email:</label>
-                <input type="email" name="email" required value="<?= htmlspecialchars($email ?? '') ?>"><br><br>
-
-                <label>Password:</label>
-                <input type="password" name="password" required><br><br>
-
-                <button type="submit">Log In</button>
-                <button type="submit" class="find-btn">Submit</button>
-                
-                <div class="message-box"><?= $message ?></div>
-            </form>
+            <section class="centered-form">
+                <h1>Login</h1>
+                <form action="login.php" method="POST">
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" name="email" required value="<?= htmlspecialchars($email ?? '') ?>"><br><br>
+                        </div>
+                        <div class="form-group">
+                            <label>Password:</label>
+                            <input type="password" name="password" required><br><br>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit">Log In</button>
+                        </div>
+                    <div class="message-box"><?= $message ?></div>
+                </form>
+            </section>
         </main>
 
         <!-- shared footer -->
