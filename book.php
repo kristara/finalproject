@@ -10,10 +10,11 @@ if (!$conn) {
 }
 
 // initialise variables
-$destination_id      = intval($_GET['destination_id'] ?? 0);
-$departure_date      = $_GET['departure_date'] ?? ''; // capture departure_date from URL
-$destination_name    = '';
+$destination_id = intval($_GET['destination_id'] ?? 0);
+$departure_date = $_GET['departure_date'] ?? ''; // capture departure_date from URL
+$destination_name = '';
 $destination_country = '';
+$return_date = '';
 
 // fetch destination details
 if ($destination_id > 0) {
@@ -26,6 +27,11 @@ if ($destination_id > 0) {
         $destination_country = $dest['country'];
     }
     $stmt->close();
+}
+
+// calculate return date
+if ($departure_date) {
+    $return_date = date('Y-m-d', strtotime($departure_date . ' +7 days'));
 }
 
 // fetch full destination list for dropdown
@@ -83,7 +89,7 @@ $conn->close();
             <section class="centered-form">
                 <h1>Book a Flight</h1>
 
-                <!-- flight form -->
+                <!-- flightorm -->
                 <form action="book.php" method="GET">
                     <div class="form-group">
                         <label>From:</label>
@@ -105,6 +111,11 @@ $conn->close();
                     <div class="form-group">
                         <label>Departure Date:</label>
                         <input type="date" name="departure_date" value="<?= htmlspecialchars($departure_date) ?>" required onchange="this.form.submit()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Return Date (7 Days Later):</label>
+                        <input type="text" value="<?= htmlspecialchars($return_date) ?>" readonly>
                     </div>
 
                     <!-- number of passengers -->

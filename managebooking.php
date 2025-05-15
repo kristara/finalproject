@@ -36,13 +36,24 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') 
         } else {
             // fetch a booking
             $booking = $stmt->get_result()->fetch_assoc();
-            if (! $booking) {
+            if ($booking) {
+                // store reservation ID in session for secure access
+                $_SESSION['reservation_id'] = $reservation_id;
+                $_SESSION['reservation_name'] = strtolower($last_name);
+            } else {
                 $message = '<p>No booking found matching those details.</p>';
             }
         }
         $stmt->close();
     }
 }
+
+// ensure secure access
+if (isset($_GET['res_id']) && !isset($_SESSION['reservation_id'])) {
+    header("Location: managebooking.php");
+    exit();
+}
+
 $conn->close();
 ?>
 

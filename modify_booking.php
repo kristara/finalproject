@@ -2,23 +2,70 @@
 session_start(); //start session
 require_once 'config.php';  // database connection
 
+// secure access check
+$resId = intval($_GET['res_id'] ?? 0);
+
+// ensure only users who accessed the booking correctly can modify it
+if (!isset($_SESSION['reservation_id']) || intval($_SESSION['reservation_id']) !== $resId) {
+    header("Location: managebooking.php");
+    exit();
+}
+// if user is not logged in but has entered booking details
+if (!isset($_SESSION['user_id'])) {
+    $lastName = $_SESSION['reservation_name'] ?? '';
+    $stmt = $conn->prepare("
+        SELECT r.reservation_id
+        FROM reservations r
+        JOIN users u ON r.user_id = u.user_id
+        WHERE r.reservation_id = ?
+        AND LOWER(u.last_name) = LOWER(?)
+    ");
+    $stmt->bind_param('is', $resId, $lastName);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        unset($_SESSION['reservation_id']);
+        unset($_SESSION['reservation_name']);
+        header("Location: managebooking.php");
+        exit();
+    }
+    $stmt->close();
+}
+
 $message = ""; // initialise message variable
 $redirect = false; // flag to control redirection
 
 // check if reservation ID is provided
-$resId = intval($_GET['res_id'] ?? $_POST['reservation_id'] ?? 0);
-if ($resId <= 0) {
-    die('Booking not found.');
-}
+$booking = null;
 
-// fetch existing booking
-$stmt = $conn->prepare("
-    SELECT flight_id, seat_class, number_of_passengers
+if (isset($_SESSION['user_id'])) {
+    // when user is logged in then use user_id to fetch booking
+    $stmt = $conn->prepare("
+        SELECT flight_id, seat_class, number_of_passengers
         FROM reservations
         WHERE reservation_id = ?
         AND user_id = ?
-");
-$stmt->bind_param('ii', $resId, $_SESSION['user_id']);
+    ");
+    $stmt->bind_param('ii', $resId, $_SESSION['user_id']);
+} else {
+    // User is not logged in - use reservation and last name for lookup
+    if (!isset($_SESSION['reservation_name'])) {
+        die('Booking not found.');
+    }
+
+    $lastName = $_SESSION['reservation_name'];
+    $stmt = $conn->prepare("
+        SELECT r.flight_id, r.seat_class, r.number_of_passengers
+        FROM reservations r
+        JOIN users u ON r.user_id = u.user_id
+        WHERE r.reservation_id = ?
+        AND LOWER(u.last_name) = LOWER(?)
+    ");
+    $stmt->bind_param('is', $resId, $lastName);
+}
+
+// execute the query
 $stmt->execute();
 $booking = $stmt->get_result()->fetch_assoc();
 $stmt->close();
@@ -132,15 +179,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             //transaction
             if ($conn->commit()) {
                 $message  = "
-                    <h3>Booking Updated Successfully!</h3>
-                    <p>Your booking has been updated with the following details:</p>
-                    <ul>
-                        <li><strong>Passengers:</strong> {$newPassengers}</li>
-                        <li><strong>Class:</strong> " . ucfirst(htmlspecialchars($newClass)) . "</li>
-                        <li><strong>Total Price:</strong> £" . number_format($newTotal,2) . "</li>
-                    </ul>
-                    <p><strong>Redirecting back in 3 seconds…</strong></p>
-                ";
+                    <div class='success-message'>
+                        <h3>Booking Updated Successfully!</h3>
+                        <p>Your booking has been updated with the following details:</p>
+                        <ul>
+                            <li><strong>Passengers:</strong> {$newPassengers}</li>
+                            <li><strong>Class:</strong> " . ucfirst(htmlspecialchars($newClass)) . "</li>
+                            <li><strong>Total Price:</strong> £" . number_format($newTotal,2) . "</li>
+                        </ul>
+                        <p><strong>Redirecting back in 5 seconds…</strong></p>
+                    </div>
+                    ";
                 $redirect = true;
             } else {
                 $conn->rollback();
@@ -159,7 +208,7 @@ $conn->close();
 	<meta charset="UTF-8">
 	<link rel="stylesheet" href="css.css">
     <?php if ($redirect): ?>
-        <script>setTimeout(() => window.location='managebooking.php', 3000);</script>
+        <script>setTimeout(() => window.location='managebooking.php', 5000);</script>
     <?php endif; ?>
 </head>
 
