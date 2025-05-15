@@ -11,14 +11,17 @@ if (!$conn) {
 
 // initialise variables
 $destination_id = intval($_GET['destination_id'] ?? 0);
-$departure_date = $_GET['departure_date'] ?? ''; // capture departure_date from URL
+$departure_date = $_GET['departure_date'] ?? '';
 $destination_name = '';
 $destination_country = '';
 $return_date = '';
 
 // fetch destination details
 if ($destination_id > 0) {
-    $stmt = $conn->prepare("SELECT name, country FROM destinations WHERE destination_id = ?");
+    $stmt = $conn->prepare("
+        SELECT name, country
+        FROM destinations
+        WHERE destination_id = ?");
     $stmt->bind_param('i', $destination_id);
     $stmt->execute();
     $dest = $stmt->get_result()->fetch_assoc();
@@ -35,19 +38,26 @@ if (!empty($departure_date)) {
 }
 
 // fetch full destination list for dropdown
-$allDestStmt = $conn->query("SELECT destination_id, name, country FROM destinations ORDER BY name ASC");
+$allDestStmt = $conn->query("
+    SELECT destination_id, name, country
+    FROM destinations
+    ORDER BY name ASC");
 
 // fetch available flights for the destination
 $flights_result = [];
 if ($destination_id > 0 && !empty($departure_date)) {
-    $stmt = $conn->prepare("SELECT f.flight_id, f.departure_date, fs.price_per_seat AS price, fs.seat_class FROM flights f JOIN flight_seats fs ON fs.flight_id = f.flight_id WHERE f.destination_id = ? AND f.departure_date >= ? ORDER BY f.departure_date ASC");
+    $stmt = $conn->prepare("
+        SELECT f.flight_id, f.departure_date, fs.price_per_seat AS price, fs.seat_class
+        FROM flights f
+        JOIN flight_seats fs ON fs.flight_id = f.flight_id
+        WHERE f.destination_id = ? AND f.departure_date >= ?
+        ORDER BY f.departure_date ASC");
     $stmt->bind_param('is', $destination_id, $departure_date);
     $stmt->execute();
     $flights_result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 }
 $conn->close();
-
 ?>
 
 <!DOCTYPE html>
@@ -139,6 +149,7 @@ $conn->close();
 
                     <!-- number of passengers -->
                     <div class="form-group">
+                        <input type="hidden" name="departure_date" value="<?= htmlspecialchars($departure_date) ?>">
                         <label>Number of Passengers:</label>
                         <input type="number" name="number_of_passengers" id="number_of_passengers" min="1" value="1" required>
                     </div>
@@ -180,6 +191,15 @@ $conn->close();
                 </form>
             </section>
         </main>
+
+        <script>
+            document.getElementById('number_of_passengers').addEventListener('input', function() {
+                const passengerCount = this.value;
+                document.querySelectorAll('#available-flights form input[name="number_of_passengers"]').forEach(input => {
+                    input.value = passengerCount;
+                });
+            });
+        </script>
 
         <!-- shared footer -->
         <?php include 'footerlinks.php'; ?>

@@ -3,17 +3,21 @@ session_start(); // start the session
 require_once 'config.php'; // database connection
 
 //validate incoming form data
-if (!isset($_POST['flight_id'], $_POST['departure_date'], $_POST['seat_class'])) {
+if (!isset($_POST['flight_id'], $_POST['departure_date'], $_POST['seat_class'], $_POST['number_of_passengers'])) {
     die("Missing flight selection.");
 }
 
 $flight_id = intval($_POST['flight_id']);
 $departure_date = $_POST['departure_date'];
 $seat_class = $_POST['seat_class'];
-$number_of_passengers = intval($_POST['number_of_passengers'] ?? 1);
+$number_of_passengers = intval($_POST['number_of_passengers']);
 
-// fetch destination details
-$stmt = $conn->prepare("SELECT f.origin, d.name AS destination, d.country, fs.price_per_seat, fs.available_seats FROM flights f JOIN destinations d ON f.destination_id = d.destination_id JOIN flight_seats fs ON fs.flight_id = f.flight_id WHERE f.flight_id = ? AND fs.seat_class = ?");
+// fetch flight and destination details in one query
+$stmt = $conn->prepare("
+    SELECT f.origin, d.name AS destination, d.country, fs.price_per_seat, fs.available_seats
+    FROM flights f JOIN destinations d ON f.destination_id = d.destination_id
+    JOIN flight_seats fs ON fs.flight_id = f.flight_id
+    WHERE f.flight_id = ? AND fs.seat_class = ?");
 $stmt->bind_param('is', $flight_id, $seat_class);
 $stmt->execute();
 $flight = $stmt->get_result()->fetch_assoc();
@@ -23,20 +27,13 @@ $stmt->close();
 $destination_name = $destination['name'] ?? 'Unknown Destination';
 $destination_country = $destination['country'] ?? 'Unknown Country';
 
-//fetch price and availability from flight_seats
-$stmt = $conn->prepare("SELECT fs.available_seats, fs.price_per_seat, f.departure_date FROM flight_seats fs JOIN flights f ON fs.flight_id = f.flight_id WHERE fs.flight_id = ? AND fs.seat_class = ?");
-$stmt->bind_param('is', $flight_id, $seat_class);
-$stmt->execute();
-$flight = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-
 //check if the flight is found
 if (!$flight) {
     die('Flight not found.');
 }
 
 //ensure available seats exist
-$available_seats = (int)($flight['available_seats'] ?? 0);
+$available_seats = (int)$flight['available_seats'];
 
 if ($available_seats < $number_of_passengers) {
     die("Only $available_seats seats left in $seat_class class.");
@@ -49,9 +46,9 @@ $total_price = $flight['price_per_seat'] * $number_of_passengers;
 $isLoggedIn = isset($_SESSION['user_id']);
 
 // if a guest user then store pending in session
-if (!$isLoggedIn) {
+if (!isset($_SESSION['user_id'])) {
     $_SESSION['pending_booking'] = [
-        'flight_id'  => $flight_id,
+        'flight_id' => $flight_id,
         'departure_date' => $departure_date,
         'seat_class' => $seat_class,
         'number_of_passengers' => $number_of_passengers,
@@ -95,7 +92,7 @@ if (!$isLoggedIn) {
                 <p><strong>Class:</strong> <?= ucfirst(htmlspecialchars($seat_class)) ?></p>
                 <p><strong>Number of Passengers:</strong> <?= htmlspecialchars($number_of_passengers) ?></p>
                 <p><strong>Total Price:</strong> £<?= number_format($total_price, 2) ?></p>
-                
+
                 <?php if ($isLoggedIn): ?>
                     <form action="finalise_booking.php" method="POST">
                         <input type="hidden" name="flight_id" value="<?= $flight_id ?>">
