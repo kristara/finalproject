@@ -6,31 +6,65 @@ require_once 'config.php'; // database connection
 $keywords = isset($_POST['keywords']) ? explode(',', $_POST['keywords']) : [];
 $price_range = $_POST['price_range'] ?? '';
 
+// validate price range
+$valid_price_ranges = ['0_500', '500_1000', '1000_2000', '2000_3000'];
+if (!in_array($price_range, $valid_price_ranges)) {
+    die("Error: Invalid price range format. Please select a valid price range.");
+}
+
 // query matching destinations
 $sql = "
     SELECT
         d.destination_id,
         d.name,
         d.country,
-        MIN(fs.price_per_seat) AS economy_price,
-        SUM(fs.available_seats) AS total_economy_seats
+        MIN(fs.price_per_seat) AS economy_price
     FROM destinations d
     JOIN flights f ON f.destination_id = d.destination_id
     JOIN flight_seats fs ON fs.flight_id = f.flight_id AND fs.seat_class = 'economy'
 ";
 
+//filters
+$conditions = [];
+$params = [];
+$types = '';
+
 //keyword filter
 if (!empty($keywords)) {
-    $sql .= "JOIN destination_keywords dk ON dk.destination_id = d.destination_id ";
-    $sql .= "WHERE dk.keyword IN (" . implode(',', array_fill(0, count($keywords), '?')) . ") ";
+    $placeholders = implode(',', array_fill(0, count($keywords), '?'));
+    $conditions[] = "d.destination_id IN (
+        SELECT destination_id
+        FROM destination_keywords
+        WHERE keyword IN ($placeholders)
+    )";
+    foreach ($keywords as $kw) {
+        $types .= 's';
+        $params[] = $kw;
+    }
 }
 
-$sql .= "GROUP BY d.destination_id, d.name, d.country ORDER BY economy_price ASC";
+// apply price filter
+if ($price_range) {
+    list($minPrice, $maxPrice) = explode('_', $price_range);
+    $conditions[] = "fs.price_per_seat BETWEEN ? AND ?";
+    $types .= 'dd';
+    $params[] = (float)$minPrice;
+    $params[] = (float)$maxPrice;
+}
+
+// combine conditions
+if (!empty($conditions)) {
+    $sql .= " WHERE " . implode(' AND ', $conditions);
+}
+
+$sql .= " GROUP BY d.destination_id, d.name, d.country ORDER BY economy_price ASC";
 
 // prepare statement
 $stmt = $conn->prepare($sql);
-if (!empty($keywords)) {
-    $stmt->bind_param(str_repeat('s', count($keywords)), ...$keywords);
+
+// bind parameters dynamically
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
 }
 
 //execute and fetch
@@ -66,13 +100,13 @@ $conn->close();
         <?php include 'primarynav.php'; ?>
 
         <main>
-        <h1>Available Destinations</h1>
+            <h1>Available Destinations</h1>
 
             <div class="destination-list">
                 <?php while ($row = $results->fetch_assoc()): ?>
                     <div class="destination-card">
                         <h2><?= htmlspecialchars($row['name']) ?>, <?= htmlspecialchars($row['country']) ?></h2>
-                        <p>From £<?= number_format($row['economy_price'], 2) ?> — <?= intval($row['total_economy_seats']) ?> seats available</p>
+                        <p>From £<?= number_format($row['economy_price'], 2) ?></p>
                         <form action="book.php" method="GET">
                             <input type="hidden" name="destination_id" value="<?= $row['destination_id'] ?>">
                             <label>Select Departure Date:</label>
