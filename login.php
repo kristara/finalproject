@@ -5,47 +5,35 @@ require_once 'config.php'; // database connection
 $message = ""; // initialise message variable
 
 // check if form is submitted
-if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] === "POST") {
-    $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
-    $password = trim($_POST['password'] ?? '');
+if (isset($_POST['email'], $_POST['password'])) {
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
 
-    // validate email and password
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || empty($password)) {
-        $message = "Invalid email or password.";
-    } else {
-        // secure prepared statement to fetch user
-        $stmt = $conn->prepare("SELECT user_id, email, password_hash FROM users WHERE email = ?");
-        $stmt->bind_param('s', $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $stmt->close();
+    // check if the user exists
+    $stmt = $conn->prepare("SELECT user_id, password_hash FROM users WHERE email = ?");
+    $stmt->bind_param('s', $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
 
-        // check if the user exists
-        if ($result->num_rows === 0) {
-            $message = "No account found with that email.";
-        } else {
-            $user = $result->fetch_assoc();
-            // verify password
-            if (password_verify($password, $user['password_hash'])) {
-                // successful login
-                $_SESSION['user_id'] = $user['user_id'];
-                $_SESSION['email'] = $user['email'];
+    if ($user && password_verify($password, $user['password_hash'])) {
+        // login successful
+        $_SESSION['user_id'] = $user['user_id'];
 
-                // if they came from a pending booking then finish that first
-                if (isset($_SESSION['pending_booking'])) {
-                    header('Location: finalise_booking.php');
-                } else {
-                    // otherwise go to their account
-                    header('Location: account.php');
-                }
-                exit;
-            } else {
-                $message = "Incorrect password.";
-            }
+        // if they came from a pending booking then finish that first
+        if (isset($_SESSION['pending_booking'])) {
+            header('Location: finalise_booking.php');
+            exit;
         }
+
+        // otherwise go to their account
+        header('Location: account.php');
+        exit;
+    } else {
+        $error = "Invalid email or password.";
     }
 }
-$conn->close();
 ?>
 
 <!DOCTYPE html>

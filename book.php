@@ -35,6 +35,8 @@ if ($destination_id > 0) {
 // calculate return date
 if (!empty($departure_date)) {
     $return_date = date('Y-m-d', strtotime($departure_date . ' +7 days'));
+} else {
+    $return_date = '';
 }
 
 // fetch full destination list for dropdown
@@ -149,15 +151,14 @@ $conn->close();
 
                     <!-- number of passengers -->
                     <div class="form-group">
-                        <input type="hidden" name="departure_date" value="<?= htmlspecialchars($departure_date) ?>">
-                        <label>Number of Passengers:</label>
-                        <input type="number" name="number_of_passengers" id="number_of_passengers" min="1" value="1" required>
+                        <label for="number_of_passengers">Number of Passengers:</label>
+                        <input type="number" id="number_of_passengers" name="number_of_passengers" min="1" value="1" required>
                     </div>
 
                     <!-- seat class -->
                     <div class="form-group">
                         <label>Seat Class:</label>
-                        <select name="seat_class" required>
+                        <select name="seat_class" id="seat_class" required>
                             <option value="economy">Economy</option>
                             <option value="business">Business</option>
                             <option value="first">First</option>
@@ -176,10 +177,10 @@ $conn->close();
                                         Price: £<?= number_format($flight['price'], 2) ?>
                                     </div>
                                     <form action="confirm_booking.php" method="POST">
-                                        <input type="hidden" name="flight_id" value="<?= $flight['flight_id'] ?>" />
-                                        <input type="hidden" name="departure_date" value="<?= $flight['departure_date'] ?>" />
-                                        <input type="hidden" name="seat_class" value="<?= $flight['seat_class'] ?>" />
-                                        <input type="hidden" name="number_of_passengers" value="1">
+                                        <input type="hidden" name="flight_id" value="<?= $flight['flight_id'] ?>">
+                                        <input type="hidden" name="departure_date" value="<?= $flight['departure_date'] ?>">
+                                        <input type="hidden" name="seat_class" value="<?= $flight['seat_class'] ?>">
+                                        <input type="hidden" name="number_of_passengers" value="1" class="passenger-count">
                                         <button type="submit">Proceed</button>
                                     </form>
                                 </li>
@@ -193,13 +194,15 @@ $conn->close();
         </main>
 
         <script>
-            document.getElementById('number_of_passengers').addEventListener('input', function() {
-                const passengerCount = this.value;
-                document.querySelectorAll('#available-flights form input[name="number_of_passengers"]').forEach(input => {
-                    input.value = passengerCount;
+            document.addEventListener('DOMContentLoaded', function() {
+                const passengerInput = document.getElementById('number_of_passengers');
+                document.querySelectorAll('.available-flight form').forEach(form => {
+                    form.addEventListener('submit', function() {
+                        form.querySelector('.passenger-count').value = passengerInput.value;
+                    });
                 });
             });
-        </script>
+</script>
 
         <!-- shared footer -->
         <?php include 'footerlinks.php'; ?>

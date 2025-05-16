@@ -88,7 +88,7 @@ $conn->close();
                 <h2>Your Reservations</h2>
                 <?php if ($reservations->num_rows === 0): ?>
                     <p>You have no reservations.</p>
-                    <p><a href="book.php" class="btn">Book a flight</a></p>
+                    <p><a href="explore.php" class="btn">Book a flight</a></p>
                 <?php else: ?>
                     <table>
                         <thead>

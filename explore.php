@@ -1,8 +1,15 @@
 <?php
 session_start(); // start the session
 require_once 'config.php'; // database connection
+if (!isset($conn) || !$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
 
-// fetch all destinations with their cheapest economy price and seat availability
+// fetch and validate filter inputs
+$keywords = isset($_POST['keywords']) ? explode(',', $_POST['keywords']) : [];
+$price_range = $_POST['price_range'] ?? '';
+
+// sql query
 $sql = "
     SELECT
         d.destination_id,
@@ -11,10 +18,26 @@ $sql = "
         MIN(fs.price_per_seat) AS economy_price
     FROM destinations d
     JOIN flights f ON f.destination_id = d.destination_id
-    JOIN flight_seats fs ON fs.flight_id = f.flight_id AND fs.seat_class = 'economy'
-    GROUP BY d.destination_id, d.name, d.country
-    ORDER BY d.name ASC
+    JOIN flight_seats fs ON fs.flight_id = f.flight_id
+    WHERE fs.seat_class = 'economy'
 ";
+
+// keyword filtering
+if (!empty($keywords)) {
+    $sql .= " AND d.destination_id IN (
+                SELECT dk.destination_id
+                FROM destination_keywords dk
+                WHERE dk.keyword IN ('" . implode("','", array_map('trim', $keywords)) . "')
+            )";
+}
+
+// apply price range if selected
+if (!empty($price_range)) {
+    list($min_price, $max_price) = explode('_', $price_range);
+    $sql .= " AND fs.price_per_seat BETWEEN $min_price AND $max_price";
+}
+
+$sql .= " GROUP BY d.destination_id, d.name, d.country ORDER BY d.name ASC";
 
 $stmt = $conn->prepare($sql);
 $stmt->execute();
@@ -29,6 +52,7 @@ $conn->close();
     <title>Explore Destinations</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css.css">
+    <script src="js/filter.js"></script>
 </head>
 
 <body>

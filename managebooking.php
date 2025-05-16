@@ -1,60 +1,66 @@
 <?php
-
 session_start(); // start session
 require_once 'config.php';// database connection
 
-$message = ''; // holds any user facing messages
-$booking = null; // will hold booking data if found
+$message = '';
+$booking = null;
 
 // check lookup form
 if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $reservation_id = intval($_POST['reservation_id'] ?? 0);
-    $last_name      = trim($_POST['last_name'] ?? '');
-    // validate both fields
-    if ($reservation_id <= 0 || $last_name === '') {
-        $message = '<p>Please enter both reservation number and last name.</p>';
+
+    // validate reservation ID
+    if ($reservation_id <= 0) {
+        $message = '<p>Please enter a valid reservation number.</p>';
     } else {
-        // Search for the reservation
-        $stmt = $conn->prepare("
-            SELECT  r.reservation_id,
+        //  search with user_id registered user
+        if (isset($_SESSION['user_id'])) {
+            $stmt = $conn->prepare("
+                SELECT
+                    r.reservation_id,
                     d.name AS destination,
                     f.departure_date,
                     r.number_of_passengers,
                     r.seat_class,
-                    r.status
+                    r.status,
+                    r.total_price
                 FROM reservations r
-                JOIN flights f       ON r.flight_id = f.flight_id
-                JOIN destinations d  ON f.destination_id = d.destination_id
-                JOIN users u         ON r.user_id = u.user_id
-            WHERE r.reservation_id = ?
-                AND LOWER(u.last_name) = LOWER(?)
-        ");
-        $stmt->bind_param('is', $reservation_id, $last_name);
-        // execute and handle any db errors
-        if (! $stmt->execute()) {
-            $message = '<p>Database error: ' . htmlspecialchars($conn->error) . '</p>';
+                JOIN flights f ON r.flight_id = f.flight_id
+                JOIN destinations d ON f.destination_id = d.destination_id
+                WHERE r.reservation_id = ? AND r.user_id = ?
+            ");
+            $stmt->bind_param('ii', $reservation_id, $_SESSION['user_id']);
         } else {
-            // fetch a booking
-            $booking = $stmt->get_result()->fetch_assoc();
-            if ($booking) {
-                // store reservation ID in session for secure access
-                $_SESSION['reservation_id'] = $reservation_id;
-                $_SESSION['reservation_name'] = strtolower($last_name);
-            } else {
-                $message = '<p>No booking found matching those details.</p>';
-            }
+            // search only by reservation_id
+            $stmt = $conn->prepare("
+                SELECT
+                    r.reservation_id,
+                    d.name AS destination,
+                    f.departure_date,
+                    r.number_of_passengers,
+                    r.seat_class,
+                    r.status,
+                    r.total_price
+                FROM reservations r
+                JOIN flights f ON r.flight_id = f.flight_id
+                JOIN destinations d ON f.destination_id = d.destination_id
+                WHERE r.reservation_id = ? AND r.user_id IS NULL
+            ");
+            $stmt->bind_param('i', $reservation_id);
         }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            $message = '<p>No reservation found matching the provided details.</p>';
+        } else {
+            $booking = $result->fetch_assoc();
+        }
+
         $stmt->close();
     }
 }
-
-// ensure secure access
-if (isset($_GET['res_id']) && !isset($_SESSION['reservation_id'])) {
-    header("Location: managebooking.php");
-    exit();
-}
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>

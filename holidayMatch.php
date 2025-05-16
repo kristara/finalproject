@@ -1,5 +1,10 @@
 <?php
 session_start(); // start the session
+require_once 'config.php'; // db
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -7,58 +12,7 @@ session_start(); // start the session
 <head>
 	<title>Holiday Match</title>
 	<meta charset="UTF-8">
-	<link rel="stylesheet" href="css.css">
-	<script>
-		<!-- javaScript for Toggle Effect -->
-        document.addEventListener("DOMContentLoaded", function() {
-            // destination features
-            document.querySelectorAll(".filter-option").forEach(button => {
-                button.addEventListener("click", function() {
-                    this.classList.toggle("active");
-                    updateSelectedKeywords();
-                });
-            });
-
-            //price range
-            document.querySelectorAll(".filter-price").forEach(button => {
-                button.addEventListener("click", function() {
-                    document.querySelectorAll(".filter-price").forEach(btn => btn.classList.remove("active"));
-                    this.classList.add("active");
-                    updateSelectedPrice();
-                });
-            });
-
-			// update selected keywords
-            function updateSelectedKeywords() {
-                const selectedKeywords = Array.from(document.querySelectorAll(".filter-option.active"));
-                if (selectedKeywords.length > 3) {
-                    alert("You can only select up to 3 keywords.");
-                    selectedKeywords[selectedKeywords.length - 1].classList.remove("active");
-                }
-                document.getElementById("selected-keywords").value = selectedKeywords.map(btn => btn.getAttribute("data-value")).join(",");
-            }
-
-			//update selected price
-            function updateSelectedPrice() {
-                const selectedPrice = document.querySelector(".filter-price.active")?.getAttribute("data-value") || "";
-                document.getElementById("selected-price-range").value = selectedPrice;
-            }
-
-            //ensure form submits correctly
-            document.getElementById("filter-form").addEventListener("submit", function(event) {
-                updateSelectedKeywords();
-                updateSelectedPrice();
-
-                const keywords = document.getElementById("selected-keywords").value;
-                const price = document.getElementById("selected-price-range").value;
-
-                if (!keywords || !price) {
-                    alert("Please select at least one keyword and one price range.");
-                    event.preventDefault();
-                }
-            });
-        });
-    </script>
+	<link rel="stylesheet" href="<?php echo 'css.css'; ?>">
 </head>
 
 <body>
@@ -112,6 +66,58 @@ session_start(); // start the session
 				<button type="submit" class="find-btn">Find Destinations</button>
 			</form>
 		</main>
+
+        <script>
+            <!-- javaScript for Toggle Effect -->
+            document.addEventListener("DOMContentLoaded", function() {
+                // destination features
+                document.querySelectorAll(".filter-option").forEach(button => {
+                    button.addEventListener("click", function() {
+                        this.classList.toggle("active");
+                        updateSelectedKeywords();
+                    });
+                });
+
+                //price range
+                document.querySelectorAll(".filter-price").forEach(button => {
+                    button.addEventListener("click", function() {
+                        document.querySelectorAll(".filter-price").forEach(btn => btn.classList.remove("active"));
+                        this.classList.add("active");
+                        updateSelectedPrice();
+                    });
+                });
+
+                // update selected keywords
+                function updateSelectedKeywords() {
+                    const selectedKeywords = Array.from(document.querySelectorAll(".filter-option.active"));
+                    if (selectedKeywords.length > 3) {
+                        alert("You can only select up to 3 keywords.");
+                        selectedKeywords[selectedKeywords.length - 1].classList.remove("active");
+                    }
+                    document.getElementById("selected-keywords").value = selectedKeywords.map(btn => btn.getAttribute("data-value")).join(",");
+                }
+
+                //update selected price
+                function updateSelectedPrice() {
+                    const selectedPrice = document.querySelector(".filter-price.active")?.getAttribute("data-value") || "";
+                    document.getElementById("selected-price-range").value = selectedPrice;
+                }
+
+                //ensure form submits correctly
+                document.getElementById("filter-form").addEventListener("submit", function(event) {
+                    updateSelectedKeywords();
+                    updateSelectedPrice();
+
+                    const keywords = document.getElementById("selected-keywords").value;
+                    const price = document.getElementById("selected-price-range").value;
+
+                    if (!keywords || !price) {
+                        alert("Please select at least one keyword and one price range.");
+                        event.preventDefault();
+                    }
+                });
+            });
+        </script>
 
 		<!-- shared footer -->
 		<?php include 'footerlinks.php'; ?>

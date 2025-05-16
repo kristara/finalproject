@@ -124,7 +124,7 @@ $conn->close();
 
             <div class="destination-list">
                 <?php while ($row = $results->fetch_assoc()):
-                    // Determine image path
+                    // image path
                     $imageBaseName = strtolower(str_replace(' ', '_', $row['name'])) . "_" . strtolower(str_replace(' ', '_', $row['country']));
                     $imagePathJpg = "images/{$imageBaseName}.jpg";
                     $imagePathJpeg = "images/{$imageBaseName}.jpeg";

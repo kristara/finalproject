@@ -9,7 +9,7 @@ require_once 'config.php'; // db connection
 $message = ""; // initialise message variable
 
 // force check for REQUEST_METHOD to avoid errors
-if (!empty($_POST['first_name']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // form data and trim whitespace
     $first_name   = htmlspecialchars(trim($_POST['first_name'] ?? ''));
     $middle_name  = htmlspecialchars(trim($_POST['middle_name'] ?? ''));
@@ -85,7 +85,6 @@ if (!empty($_POST['first_name']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 }
-$conn->close();
 ?>
 
 <!DOCTYPE html>

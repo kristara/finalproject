@@ -4,103 +4,89 @@ require_once 'config.php'; // database connection
 
 $message = ""; // initialise message variable
 
-// grab the request method to avoid undefined index
-$method = $_SERVER['REQUEST_METHOD'] ?? '';
-
-// Check if the form was submitted and if the reservation ID is provided
-if ($method === 'POST' && !empty($_POST['reservation_id'])) {
-    // Retrieve the reservation ID from the form
+// check request
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_id'])) {
     $reservation_id = intval($_POST['reservation_id']);
 
-    //validate that a reservation ID is provided
+    // ensure the reservation ID is valid
     if ($reservation_id <= 0) {
-        $message = "<p class='error-message'>Invalid reservation ID.</p>";
+        $message = "<h1>Error: Invalid reservation ID.</h1>";
     } else {
-        //check current status
-        $stmt = $conn->prepare("
-            SELECT status
-            FROM reservations
-            WHERE reservation_id = ?
-        ");
-        $stmt->bind_param('i', $reservation_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        // check if reservation exists then fetch status
-        if ($row = $result->fetch_assoc()) {
-            if ($row['status'] === 'cancelled') {
-                $message = "<p>This booking is already cancelled.</p>";
-            } else {
-                 // update the reservation status to "cancelled"
-                $upd = $conn->prepare("
-                    UPDATE reservations
-                    SET status = 'cancelled'
-                    WHERE reservation_id = ?
-                ");
-                $upd->bind_param('i', $reservation_id);
-                $upd->execute();
-                //check if update succeeded
-                if ($upd->affected_rows > 0) {
-                    $message = "
-                        <h1>Booking Cancelled Successfully!</h1>
-                        <p>Your booking has been cancelled.</p>
-                    ";
-                } else {
-                    $message = "<p class='error-message'>Failed to cancel the booking. Please try again.</p>";
-                }
-                $upd->close();
-            }
+        // if user is logged in then use their user ID for cancellation
+        if (isset($_SESSION['user_id'])) {
+            $stmt = $conn->prepare("DELETE FROM reservations WHERE reservation_id = ? AND user_id = ?");
+            $stmt->bind_param('ii', $reservation_id, $_SESSION['user_id']);
         } else {
-        // If the reservation does not exist
-            $message = "<p class='error-message'>No booking found with that reservation number.</p>";
+            // for guests the directly delete without user_id
+            if (isset($_SESSION['reservation_id'], $_SESSION['reservation_name'])) {
+                $session_reservation_id = $_SESSION['reservation_id'];
+                $lastName = $_SESSION['reservation_name'];
+
+                // check if session reservation ID matches the submitted ID
+                if ($session_reservation_id === $reservation_id) {
+                    $stmt = $conn->prepare("
+                        DELETE FROM reservations
+                        WHERE reservation_id = ?
+                        AND user_id = (
+                            SELECT user_id FROM users
+                            WHERE LOWER(last_name) = LOWER(?)
+                            LIMIT 1
+                        )
+                    ");
+                    $stmt->bind_param('is', $reservation_id, $lastName);
+                } else {
+                    $message = "<h1>Error: Reservation ID mismatch.</h1>";
+                }
+            } else {
+                $message = "<h1>Error: No booking found to cancel. (Session Missing)</h1>";
+            }
         }
-        // close the statement
-        $stmt->close();
+
+        // cancellation
+        if (isset($stmt)) {
+            $stmt->execute();
+            if ($stmt->affected_rows > 0) {
+                // session reservation for guests
+                unset($_SESSION['reservation_id'], $_SESSION['reservation_name']);
+                $message = "<h1>Booking Cancelled Successfully!</h1><p>Your booking has been cancelled.</p>";
+            } else {
+                $message = "<h1>Error: No matching booking found to cancel.</h1>";
+            }
+            $stmt->close();
+        } else {
+            $message = "<h1>Error: Cancellation process failed.</h1>";
+        }
     }
 } else {
-    // if not a valid request
-    $message = "<p>Invalid request. Please use the booking page to cancel your reservation.</p>";
+    $message = "<h1>Error: No booking found to cancel.</h1>";
 }
-$conn->close();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Cancel Booking</title>
-	<meta charset="UTF-8">
-	<link rel="stylesheet" href="css.css">
+    <meta charset="UTF-8">
+    <title>Cancel Booking</title>
+    <link rel="stylesheet" href="css.css">
 </head>
-
 <body>
-	<div id="pagewrapper">
-		<nav id="headerlinks">
-			<ul>
-				<?php if (isset($_SESSION['user_id'])): ?>
-                    <li><a href="account.php">My Account</a></li>
-                    <li><a href="logout.php">Log Out</a></li>
-                <?php else: ?>
-                    <li><a href="registration.php">Register</a></li>
-                    <li><a href="login.php">Log In</a></li>
-                <?php endif; ?>
-			</ul>
-		</nav>
+    <div id="pagewrapper">
+        <?php include 'primarynav.php'; ?>
 
-        <!-- shared header and primary nav -->
-	    <?php include 'primarynav.php'; ?>
+        <main class="centered-form">
+            <h1>Cancel Booking</h1>
 
-	    <main>
-		    <section>
-			    <h1>Cancel Booking</h1>
-                <div class="message-box">
-                    <?= htmlspecialchars($message) ?>
-                </div>
-                <p><a href="managebooking.php">Return to Manage Booking</a></p>
-            </section>
+            <div class="message-box">
+                <?= $message ?>
+            </div>
+            <p><a href="managebooking.php">Return to Manage Booking</a></p>
         </main>
 
-        <!-- shared footer -->
         <?php include 'footerlinks.php'; ?>
-	</div>
+    </div>
 </body>
 </html>
+
+<?php
+$conn->close();
+?>
